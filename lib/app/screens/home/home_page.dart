@@ -1,3 +1,4 @@
+import 'package:cidade_singular/app/screens/city/city_page.dart';
 import 'package:cidade_singular/app/screens/home/menu_page_model.dart';
 import 'package:cidade_singular/app/screens/home/menu_widget.dart';
 import 'package:flutter/material.dart';
@@ -35,9 +36,7 @@ class _HomePageState extends State<HomePage> {
       MenuPageModel(
         name: "Cidade",
         svgIconPath: "assets/images/city.svg",
-        page: Scaffold(
-          backgroundColor: Colors.pinkAccent,
-        ),
+        page: CityPage(),
       ),
       MenuPageModel(
         name: "Mapa",
