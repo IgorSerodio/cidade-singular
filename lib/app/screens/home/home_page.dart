@@ -1,6 +1,7 @@
 import 'package:cidade_singular/app/screens/city/city_page.dart';
 import 'package:cidade_singular/app/screens/home/menu_page_model.dart';
 import 'package:cidade_singular/app/screens/home/menu_widget.dart';
+import 'package:cidade_singular/app/screens/map/map_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -41,9 +42,7 @@ class _HomePageState extends State<HomePage> {
       MenuPageModel(
         name: "Mapa",
         svgIconPath: "assets/images/places.svg",
-        page: Scaffold(
-          backgroundColor: Colors.amberAccent,
-        ),
+        page: MapPage(),
       ),
       MenuPageModel(
         name: "Favoritos",
@@ -78,6 +77,7 @@ class _HomePageState extends State<HomePage> {
         body: Stack(
           children: [
             PageView(
+              physics: NeverScrollableScrollPhysics(),
               controller: pageController,
               children: pages.map((p) => p.page).toList(),
             ),
