@@ -1,9 +1,14 @@
 import 'package:cidade_singular/app/screens/home/home_page.dart';
+import 'package:cidade_singular/app/services/dio_service.dart';
+import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AppModule extends Module {
   @override
-  final List<Bind> binds = [];
+  final List<Bind> binds = [
+    Bind((i) => DioService()),
+    Bind((i) => SingularityService(i.get())),
+  ];
 
   @override
   final List<ModularRoute> routes = [
