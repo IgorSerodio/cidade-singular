@@ -4,6 +4,8 @@ class Constants {
   static const Color primaryColor = Color(0xFF28276B);
   static const Color disableColor = Color(0xFF898A96);
   static const Color grey = Color(0xFFE5E5E5);
+  static const Color textColor1 = Color(0xFF5E5E5E);
+  static const Color textColor2 = Color(0xFF898A96);
 
   static const Color MUSIC = Color(0xFFF3D59B);
   static const Color ARTS = Color(0xFF8588DD);

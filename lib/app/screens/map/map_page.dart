@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:cidade_singular/app/models/singularity.dart';
+import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
+import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,6 +18,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final Completer<GoogleMapController> _controller = Completer();
   SingularityService service = Modular.get();
+  bool loading = false;
 
   @override
   initState() {
@@ -28,42 +31,62 @@ class _MapPageState extends State<MapPage> {
   List<Singularity> singularities = [];
 
   getSingularites() async {
+    setState(() => loading = true);
     singularities = await service.getSingularities();
     var icons = await loadBitmapIcons();
-    Set<Marker> newMarkers = singularities
-        .map(
-          (sing) => Marker(
-            markerId: MarkerId(sing.id),
-            position: sing.latLng,
-            icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
-            infoWindow: InfoWindow(
-              onTap: () {},
-              title: sing.title,
-              snippet: sing.address,
-            ),
-          ),
-        )
-        .toSet();
-    setState(() => markers = newMarkers);
+    Set<Marker> newMarkers = singularities.map((sing) {
+      MarkerId markerId = MarkerId(sing.id);
+      return Marker(
+        markerId: markerId,
+        position: sing.latLng,
+        icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
+        infoWindow: InfoWindow(
+          onTap: () async {
+            Modular.to.pushNamed(SingularityPage.routeName, arguments: sing);
+          },
+          title: sing.title,
+          snippet: sing.address,
+        ),
+      );
+    }).toSet();
+    setState(() {
+      markers = newMarkers;
+      loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GoogleMap(
-        myLocationEnabled: false,
-        myLocationButtonEnabled: false,
-        liteModeEnabled: false,
-        rotateGesturesEnabled: false,
-        mapType: MapType.normal,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(-7.23072, -35.8817),
-          zoom: 13,
-        ),
-        onMapCreated: (GoogleMapController controller) async {
-          _controller.complete(controller);
-        },
-        markers: markers,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: GoogleMap(
+              myLocationEnabled: false,
+              myLocationButtonEnabled: false,
+              liteModeEnabled: false,
+              rotateGesturesEnabled: false,
+              mapType: MapType.normal,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(-7.23072, -35.8817),
+                zoom: 13,
+              ),
+              onMapCreated: (GoogleMapController controller) async {
+                _controller.complete(controller);
+              },
+              markers: markers,
+            ),
+          ),
+          if (loading)
+            Container(
+              color: Colors.black26,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Constants.primaryColor,
+                ),
+              ),
+            )
+        ],
       ),
     );
   }
