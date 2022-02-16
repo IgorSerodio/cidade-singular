@@ -1,3 +1,4 @@
+import 'package:cidade_singular/app/screens/city/choose_city_dialog.dart';
 import 'package:cidade_singular/app/screens/home/home_page.dart';
 import 'package:cidade_singular/app/services/city_service.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
@@ -16,44 +17,27 @@ class _SplashPageState extends State<SplashPage> {
   CityService cityService = Modular.get();
 
   bool loading = true;
+
   @override
   void initState() {
-    cityService.getCities().then((cities) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-            title: Text("Escolha uma cidade para continuar"),
-            content: SingleChildScrollView(
-              child: Column(
-                children: cities
-                    .map(
-                      (city) => ListTile(
-                        onTap: () {
-                          cityStore.setCity.call([city]);
-                          Modular.to.popAndPushNamed(HomePage.routeName);
-                        },
-                        leading: SizedBox(
-                          width: 80,
-                          height: 80,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(2),
-                            child: Image.network(
-                              city.pictures.isNotEmpty
-                                  ? city.pictures.first
-                                  : "https://via.placeholder.com/150",
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        title: Text(city.title),
-                        subtitle: Text(city.subtitle),
-                      ),
-                    )
-                    .toList(),
-              ),
-            )),
-      );
+    cityService.getCity().then((city) {
+      if (city != null) {
+        cityStore.setCity.call([city]);
+        Modular.to.popAndPushNamed(HomePage.routeName);
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => ChooseCityDialog(
+            onChoose: (city) {
+              cityService.saveCity(city.id);
+              cityStore.setCity.call([city]);
+              Modular.to.popAndPushNamed(HomePage.routeName);
+            },
+          ),
+        );
+      }
     });
+
     super.initState();
   }
 
