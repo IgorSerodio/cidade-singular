@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
+import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -18,6 +19,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final Completer<GoogleMapController> _controller = Completer();
   SingularityService service = Modular.get();
+  CityStore cityStore = Modular.get();
   bool loading = false;
 
   @override
@@ -68,7 +70,7 @@ class _MapPageState extends State<MapPage> {
               rotateGesturesEnabled: false,
               mapType: MapType.normal,
               initialCameraPosition: CameraPosition(
-                target: LatLng(-7.23072, -35.8817),
+                target: cityStore.city.latLng,
                 zoom: 13,
               ),
               onMapCreated: (GoogleMapController controller) async {
