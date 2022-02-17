@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:cidade_singular/app/models/singularity.dart';
+import 'package:cidade_singular/app/models/user.dart';
+import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapPage extends StatefulWidget {
@@ -32,9 +35,12 @@ class _MapPageState extends State<MapPage> {
 
   List<Singularity> singularities = [];
 
-  getSingularites() async {
+  getSingularites({CuratorType? type}) async {
     setState(() => loading = true);
-    singularities = await service.getSingularities();
+    singularities = await service.getSingularities(query: {
+      "city": cityStore.city.id,
+      if (type != null) "type": type.toString().split(".").last,
+    });
     var icons = await loadBitmapIcons();
     Set<Marker> newMarkers = singularities.map((sing) {
       MarkerId markerId = MarkerId(sing.id);
@@ -87,9 +93,47 @@ class _MapPageState extends State<MapPage> {
                   color: Constants.primaryColor,
                 ),
               ),
-            )
+            ),
+          Positioned.fill(
+            child: FilterTypeWidget(
+              onChoose: (type) {
+                getSingularites(type: type);
+              },
+            ),
+            top: 100,
+            bottom: 150,
+          )
         ],
       ),
+    );
+  }
+
+  Widget selectTypeWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: CuratorType.values
+          .map(
+            (type) => GestureDetector(
+              onTap: () {},
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Constants.getColor(type.toString().split(".").last),
+                    borderRadius: BorderRadius.circular(50)),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(type.value),
+                    SvgPicture.asset(
+                        "assets/images/${type.toString().split(".").last}.svg",
+                        width: 20)
+                  ],
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
