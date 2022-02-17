@@ -1,4 +1,5 @@
 import 'package:cidade_singular/app/screens/city/city_page.dart';
+import 'package:cidade_singular/app/screens/curators/curators_page.dart';
 import 'package:cidade_singular/app/screens/home/menu_page_model.dart';
 import 'package:cidade_singular/app/screens/home/menu_widget.dart';
 import 'package:cidade_singular/app/screens/map/map_page.dart';
@@ -45,18 +46,9 @@ class _HomePageState extends State<HomePage> {
         page: MapPage(),
       ),
       MenuPageModel(
-        name: "Favoritos",
-        svgIconPath: "assets/images/favorite.svg",
-        page: Scaffold(
-          backgroundColor: Colors.blueAccent,
-        ),
-      ),
-      MenuPageModel(
         name: "Info",
         svgIconPath: "assets/images/info.svg",
-        page: Scaffold(
-          backgroundColor: Colors.blueAccent,
-        ),
+        page: CuratorsPage(),
       ),
     ];
 
