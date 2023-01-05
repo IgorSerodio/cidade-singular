@@ -17,7 +17,7 @@ class SingularityPage extends StatefulWidget {
 
 class _SingularityPageState extends State<SingularityPage> {
   String coverImg =
-      "https://compcult.s3.us-east-1.amazonaws.com/cidade-singular/4054014.jpg";
+      "https://p-cidade-singular.s3.sa-east-1.amazonaws.com/test-imgs/4054014.jpg";
 
   @override
   void initState() {
