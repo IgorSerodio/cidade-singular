@@ -5,6 +5,11 @@ import 'package:cidade_singular/app/screens/home/menu_widget.dart';
 import 'package:cidade_singular/app/screens/map/map_page.dart';
 import 'package:flutter/material.dart';
 
+import 'package:cidade_singular/app/screens/profile/profile_page.dart';
+
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 class HomePage extends StatefulWidget {
   final String title;
   const HomePage({Key? key, this.title = "Home"}) : super(key: key);
@@ -49,6 +54,11 @@ class _HomePageState extends State<HomePage> {
         name: "Info",
         svgIconPath: "assets/images/info.svg",
         page: CuratorsPage(),
+      ),
+      MenuPageModel(
+        name: "Perfil",
+        svgIconPath: "assets/images/info.svg",
+        page: ProfilePage(),
       ),
     ];
 
