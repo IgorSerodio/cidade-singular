@@ -5,6 +5,10 @@ import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
+import 'package:cidade_singular/app/screens/login/login_page.dart';
+import 'package:cidade_singular/app/services/user_service.dart';
+import 'package:cidade_singular/app/stores/user_store.dart';
+
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
 
@@ -13,6 +17,9 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  UserService userService = Modular.get();
+  UserStore userStore = Modular.get();
+
   CityStore cityStore = Modular.get();
   CityService cityService = Modular.get();
 
@@ -20,21 +27,27 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   void initState() {
-    cityService.getCity().then((city) {
-      if (city != null) {
-        cityStore.setCity.call([city]);
-        Modular.to.popAndPushNamed(HomePage.routeName);
+    userService.me().then((user) {
+      if (user != null) {
+        cityService.getCity().then((city) {
+          if (city != null) {
+            cityStore.setCity.call([city]);
+            Modular.to.popAndPushNamed(HomePage.routeName);
+          } else {
+            showDialog(
+              context: context,
+              builder: (context) => ChooseCityDialog(
+                onChoose: (city) {
+                  cityService.saveCity(city.id);
+                  cityStore.setCity.call([city]);
+                  Modular.to.popAndPushNamed(HomePage.routeName);
+                },
+              ),
+            );
+          }
+        });
       } else {
-        showDialog(
-          context: context,
-          builder: (context) => ChooseCityDialog(
-            onChoose: (city) {
-              cityService.saveCity(city.id);
-              cityStore.setCity.call([city]);
-              Modular.to.popAndPushNamed(HomePage.routeName);
-            },
-          ),
-        );
+        Modular.to.popAndPushNamed(LoginPage.routeName);
       }
     });
 
