@@ -7,6 +7,8 @@ import 'package:cidade_singular/app/services/city_service.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
+import 'package:cidade_singular/app/services/review_service.dart';
+
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -20,6 +22,7 @@ class AppModule extends Module {
     Bind((i) => SingularityService(i.get())),
     Bind((i) => CityService(i.get())),
     Bind((i) => UserService(i.get())),
+    Bind((i) => ReviewService(i.get())),
     Bind((i) => CityStore()),
     Bind((i) => AuthService(i.get())),
     Bind((i) => UserStore())

@@ -87,6 +87,7 @@ class UserService {
     String? type,
     String? curator_type,
     String? city,
+    int? xp,
     required String id,
   }) async {
     try {
@@ -99,6 +100,7 @@ class UserService {
           if (type != null) "type": type,
           if (curator_type != null) "curator_type": curator_type,
           if (city != null) "city": city,
+          if (xp != null) "xp": xp,
         },
       );
 
@@ -140,6 +142,33 @@ class UserService {
         print(e);
       }
       return [];
+    }
+  }
+
+  Future<User?> addXp({
+    required String id,
+    required int amount,
+  }) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/addxp/$id",
+        data: {
+          "xp": amount,
+        },
+      );
+
+      if (response.data["error"]) {
+        return null;
+      } else {
+        return User.fromMap(response.data["item"]);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      } else {
+        print(e);
+      }
+      return null;
     }
   }
 }
