@@ -9,6 +9,10 @@ import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
+import '../../services/city_service.dart';
+import '../../stores/city_store.dart';
+import '../city/choose_city_dialog.dart';
+
 class LoginPage extends StatefulWidget {
   String email;
   LoginPage({Key? key, this.email = ""}) : super(key: key);
@@ -49,13 +53,19 @@ class _LoginPageState extends State<LoginPage> {
   bool loginError = false;
   bool loading = false;
 
+  CityStore cityStore = Modular.get();
+  CityService cityService = Modular.get();
+  
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
         body: Center(
-          child: Container(
+          child: Column( 
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+            Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Colors.white,
@@ -149,12 +159,22 @@ class _LoginPageState extends State<LoginPage> {
                             });
                             if (_formKey.currentState!.validate()) {
                               bool logged = await authService.login(
-                                  email: emailController.text,
+                                  email: emailController.text.toLowerCase().trim(),
                                   password: passwordController.text);
                               if (logged) {
                                 User? user = await userService.me();
                                 userStore.setUser(user);
-                                Modular.to.popAndPushNamed(HomePage.routeName);
+                                return showDialog(
+              context: context,
+              builder: (context) => ChooseCityDialog(
+                onChoose: (city) {
+                  cityService.saveCity(city.id);
+                  cityStore.setCity.call([city]);
+                  Modular.to.popAndPushNamed(HomePage.routeName);
+                },
+              ),
+            );
+                                // Modular.to.popAndPushNamed(HomePage.routeName);
                               } else {
                                 setState(() {
                                   loginError = true;
@@ -216,6 +236,22 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+                onTap: () => Modular.to.popAndPushNamed(HomePage.routeName),
+                child: Container(
+                  margin: EdgeInsets.only(left: 16, right: 16),
+                  padding: EdgeInsets.only(left: 16, right: 16),
+                  child: Text(
+                    "Entrar sem login",
+                    style: TextStyle(
+                      fontSize: 14,
+                    ),
+                  ),
+                )),
+          ),
+        ])
         ),
       ),
     );

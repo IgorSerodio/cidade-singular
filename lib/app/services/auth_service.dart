@@ -1,10 +1,13 @@
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';
+import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class AuthService {
   DioService dioService;
+  UserStore userStore = Modular.get();
 
   AuthService(this.dioService);
 
@@ -35,8 +38,10 @@ class AuthService {
   }
 
   Future logout() async {
+    userStore.user = null;
     dioService.removeToken();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
+    await prefs.remove('cityId');
   }
 }

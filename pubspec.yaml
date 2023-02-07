@@ -43,6 +43,10 @@ dependencies:
   shared_preferences: ^2.0.13
   image_picker: ^0.8.4+9
   flutter_rating_bar: ^4.0.1
+  social_share: ^2.3.1
+  font_awesome_flutter: ^10.3.0
+  percent_indicator: ^4.2.2
+  lottie: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +74,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/lottie/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

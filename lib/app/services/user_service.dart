@@ -47,6 +47,8 @@ class UserService {
           "email": email,
           "password": password,
           "name": name,
+          "type": "VISITOR",
+          "xp": 0,
         },
       );
 

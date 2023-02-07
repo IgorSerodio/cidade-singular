@@ -15,6 +15,10 @@ import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 
+import '../shared/social_share_bar.dart';
+import '../shared/review_list.dart';
+import 'package:lottie/lottie.dart';
+
 class SingularityPage extends StatefulWidget {
   final Singularity singularity;
 
@@ -30,6 +34,7 @@ class SingularityPage extends StatefulWidget {
 class _SingularityPageState extends State<SingularityPage> {
   bool loading = false;
   double rating = 0.0;
+  double ratingReview = 0.0;
 
   ReviewService service = Modular.get();
   UserService userService = Modular.get();
@@ -229,7 +234,12 @@ class _SingularityPageState extends State<SingularityPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
+                SocialShareBar(
+                    addXp: addXp,
+                    rating: calculaRating(reviews),
+                    singularity: widget.singularity),
+                SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
@@ -263,7 +273,7 @@ class _SingularityPageState extends State<SingularityPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    "Reviews",
+                    "Avaliações",
                     softWrap: true,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -275,92 +285,19 @@ class _SingularityPageState extends State<SingularityPage> {
                   ),
                 ),
                 SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: SizedBox(
-                          height: 200.0,
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: reviews.length,
-                            itemBuilder: (BuildContext ctxt, int index) {
-                              return Container(
-                                margin: EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      blurRadius: 2,
-                                      offset: Offset(4, 8), // Shadow position
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(10.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                          padding: const EdgeInsets.only(top: 20.0, left: 10.0),
-                                          
-                                          child: Text(reviews[index].comment),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Row(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            child: Image.network(
-                                              reviews[index].creator.picture,
-                                              fit: BoxFit.cover,
-                                              height: 30,
-                                            ),
-                                          ),
-                                          Text(
-                                              "  ${reviews[index].creator.name}"),
-                                          RatingBarIndicator(
-                                            rating: reviews[index]
-                                                .rating
-                                                .toDouble(),
-                                            itemPadding:
-                                                EdgeInsets.only(left: 10),
-                                            itemBuilder: (context, index) =>
-                                                Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                            ),
-                                            itemCount: 5,
-                                            itemSize: 20.0,
-                                            direction: Axis.horizontal,
-                                          ),
-                                        ],
-                                      ),
-                                    ),                                   
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  ),
-                ),
+                reviews.isEmpty ? SizedBox():ReviewList(reviews: reviews),
+                SizedBox(height: 10),
                 TextButton.icon(
                   // <-- TextButton
-                  onPressed: () {
-                    openDialogue();
-                  },
+                  // onPressed: () {
+                  //   openDialogue();
+                  // },
+                  onPressed: userStore.user == null ? null : ()=>{openDialogue()},
                   icon: Icon(
                     Icons.add_circle_outline,
                     size: 24.0,
                   ),
-                  label: Text('Nova Review'),
+                  label: Text('Nova Avaliação'),
                 ),
               ],
             ),
@@ -373,9 +310,8 @@ class _SingularityPageState extends State<SingularityPage> {
   Future openDialogue() => showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-              content: Expanded(
+              content: SingleChildScrollView(
                 child: SizedBox(
-                  height: 170,
                   width: 500,
                   child: Column(children: [
                     Text(
@@ -397,7 +333,7 @@ class _SingularityPageState extends State<SingularityPage> {
                           Icon(Icons.star, color: Colors.amber),
                       onRatingUpdate: (value) {
                         setState(() {
-                          rating = value;
+                          ratingReview = value;
                         });
                       },
                     ),
@@ -406,6 +342,7 @@ class _SingularityPageState extends State<SingularityPage> {
                       autocorrect: true,
                       minLines: 1,
                       maxLines: 3,
+                      maxLength: 120,
                       // decoration: InputDecoration(hintText: "Comente algo"),
                       style: TextStyle(
                         fontSize: 16,
@@ -425,17 +362,64 @@ class _SingularityPageState extends State<SingularityPage> {
                     ),
                   ),
                   onPressed: () async {
-                    var result = await addNewReview(userStore.user?.id ?? "",
-                        widget.singularity.id, commentController.text, rating);
+                    var result = await addNewReview(
+                        userStore.user?.id ?? "",
+                        widget.singularity.id,
+                        commentController.text.trim(),
+                        ratingReview);
                     if (result) {
                       Navigator.of(context).pop(true);
+                      await openCongratulationDialogue('Obrigado pela avaliação!', 100);
                     }
                   },
                 )
               ]));
 
-  addNewReview(String creatorId, String singularityId, String comment,
-      double rating) async {
+  Future openCongratulationDialogue(String text, int points) =>
+      showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+                  content: SingleChildScrollView(
+                      child: SizedBox(
+                    width: 500,
+                    child: SizedBox(
+                      width: 200,
+                      child: Column(children: [
+                        Lottie.asset(
+                          'assets/lottie/64963-topset-complete.json',
+                        ),
+                        Text(text,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            )),
+                        Text(userStore.user==null? 'Faça login para acumular suas Crias!':"Você recebeu $points Crias.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.greenAccent,
+                            )),
+                      ]),
+                    ),
+                  )),
+                  actions: [
+                    TextButton(
+                      child: Text(
+                        'Voltar',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                    )
+                  ]));
+
+  addNewReview(String creatorId, String singularityId, String comment, double rating) async {
     if (userStore.user == null) return false;
 
     bool? reviewAdded = await service.addReview(
@@ -444,23 +428,41 @@ class _SingularityPageState extends State<SingularityPage> {
         comment: comment,
         rating: rating);
 
-    User? user = await userService.addXp(id: creatorId, amount: 500);
-    
+    if (reviewAdded) {
+      await addXp(100);
+    }
+
+    return reviewAdded;
+  }
+
+  addXp(int amount) async {
+    var id = userStore.user?.id ?? "";
+
+    if (id == "") {
+      return;
+    }
+
+    User? user = await userService.addXp(id: id, amount: amount);
+
     if (user != null) {
       userStore.setUser(user);
     }
-    return reviewAdded;
   }
-}
 
-calculaRating(List<Review> reviews) {
-  var size = reviews.length;
-  if (size == 0) return 0.0;
+  double calculaRating(List<Review> reviews) {
+    var size = reviews.length;
+    if (size == 0) return 0.0;
 
-  var sum = 0.0;
-  for (Review review in reviews) {
-    sum += review.rating;
+    var sum = 0.0;
+    for (Review review in reviews) {
+      sum += review.rating;
+    }
+    var average = sum / reviews.length;
+    var averageTruncate = (average * 100).truncate() / 100;
+
+    setState(() {
+      rating = averageTruncate;
+    });
+    return averageTruncate;
   }
-  var average = sum / reviews.length;
-  return average;
 }

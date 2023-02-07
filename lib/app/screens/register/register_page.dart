@@ -110,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                             if (_formKey.currentState!.validate()) {
                               bool registered = await userService.register(
-                                email: emailController.text,
+                                email: emailController.text.toLowerCase().trim(),
                                 password: passwordController.text,
                                 name: usernameController.text,
                               );
@@ -134,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     Duration(milliseconds: 1000));
                                 Modular.to.popAndPushNamed(
                                   LoginPage.routeName,
-                                  arguments: emailController.text,
+                                  arguments: emailController.text.toLowerCase().trim(),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,7 @@
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/login/login_page.dart';
+import 'package:cidade_singular/app/screens/opening/opening_page.dart';
+
 import 'package:cidade_singular/app/services/auth_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
@@ -8,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'package:percent_indicator/percent_indicator.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -36,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   logout() async {
     await authService.logout();
-    Modular.to.popAndPushNamed(LoginPage.routeName);
+    Modular.to.popAndPushNamed(OpeningPage.routeName);
   }
 
   final ImagePicker picker = ImagePicker();
@@ -87,9 +91,9 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Sair"),
+                Text(userStore.user == null ? "Login": "Sair"),
                 SizedBox(width: 5),
-                Icon(Icons.logout_outlined),
+                Icon(userStore.user == null ? Icons.login : Icons.logout_outlined),
               ],
             ),
           )
@@ -101,7 +105,17 @@ class _ProfilePageState extends State<ProfilePage> {
           User? user = userStore.user;
 
           return user == null
-              ? Container()
+              ? Align(
+                child: Text(
+                  "Faça login para ter acesso a todas as funcionalidades!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Constants.primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -144,6 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                     ),
                     SizedBox(height: 20),
+                    getWidgetNivel(user.xp),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -157,7 +172,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     readOnly: false),
                               )
                             : Text(
-                                "Nível: " + (user.xp~/1000).toString() + "\n" +user.name,
+                                user.name,
                                 style: TextStyle(
                                   fontSize: 26,
                                   color: Constants.primaryColor,
@@ -277,5 +292,60 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ],
     );
+  }
+
+  int calculaXpDoNivel(int value) {
+    if (value < 1000) return value;
+
+    var strValue = value.toString();
+    var len = strValue.length;
+
+    var xp = strValue.substring(len - 3);
+    return int.parse(xp);
+  }
+
+  Widget getWidgetNivel(int crias) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          getUserTitle(crias),
+          style: TextStyle(
+            fontSize: 16,
+            color: Constants.primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        LinearPercentIndicator(
+          lineHeight: 20.0,
+          percent: crias / getRange(crias),
+          progressColor: Constants.primaryColor,
+          backgroundColor: Constants.grey,
+          curve: Curves.linear,
+        ),
+        Text(
+          "$crias/${getRange(crias)}",
+          style: TextStyle(
+              fontSize: 14.0,
+              fontWeight: FontWeight.w800,
+              color: Constants.primaryColor),
+        ),
+      ],
+    );
+  }
+
+  String getUserTitle(int crias) {
+    if (crias >= 5000) return 'Vice-Curador';
+    if (crias >= 1001) return 'Visitante Criativo';
+    if (crias >= 101) return 'Visitante Singular';
+    return 'Visitante Descobridor';
+  }
+
+  int getRange(int crias) {
+    if (crias >= 5000) return crias;
+    if (crias >= 1001) return 5000;
+    if (crias >= 101) return 1001;
+    return 101;
   }
 }

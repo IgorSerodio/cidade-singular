@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
       ),
       MenuPageModel(
         name: "Perfil",
-        svgIconPath: "assets/images/info.svg",
+        svgIconPath: "assets/images/icon-person.svg",
         page: ProfilePage(),
       ),
     ];
