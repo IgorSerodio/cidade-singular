@@ -111,7 +111,8 @@ class _CityPageState extends State<CityPage> {
                   style: TextStyle(
                     color: Colors.black54,
                   ),
-                )
+                ),
+                SizedBox(height: 80),
               ],
             ),
           ),

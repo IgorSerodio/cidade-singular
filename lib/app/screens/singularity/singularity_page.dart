@@ -1,11 +1,27 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'package:cidade_singular/app/models/singularity.dart';
+import 'package:cidade_singular/app/models/review.dart';
+import 'package:cidade_singular/app/models/user.dart';
+
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:cidade_singular/app/services/review_service.dart';
+import 'package:cidade_singular/app/services/user_service.dart';
+
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:cidade_singular/app/stores/user_store.dart';
+
+import '../shared/social_share_bar.dart';
+import '../shared/review_list.dart';
+import 'package:lottie/lottie.dart';
+
 class SingularityPage extends StatefulWidget {
   final Singularity singularity;
+
   const SingularityPage({Key? key, required this.singularity})
       : super(key: key);
 
@@ -16,17 +32,42 @@ class SingularityPage extends StatefulWidget {
 }
 
 class _SingularityPageState extends State<SingularityPage> {
+  bool loading = false;
+  double rating = 0.0;
+  double ratingReview = 0.0;
+
+  ReviewService service = Modular.get();
+  UserService userService = Modular.get();
+
+  final commentController = TextEditingController();
+
+  UserStore userStore = Modular.get();
+
   String coverImg =
-      "https://compcult.s3.us-east-1.amazonaws.com/cidade-singular/4054014.jpg";
+      "https://p-cidade-singular.s3.sa-east-1.amazonaws.com/test-imgs/4054014.jpg";
 
   @override
   void initState() {
+    getReviews(widget.singularity);
+
     setState(() {
       if (widget.singularity.photos.isNotEmpty) {
         coverImg = widget.singularity.photos.first;
       }
     });
     super.initState();
+  }
+
+  List<Review> reviews = [];
+
+  getReviews(Singularity singularity) async {
+    setState(() => loading = true);
+    reviews = await service.getReviews(query: {
+      "singularity": singularity.id,
+    });
+    setState(() {
+      loading = false;
+    });
   }
 
   @override
@@ -115,6 +156,18 @@ class _SingularityPageState extends State<SingularityPage> {
           SliverList(
             delegate: SliverChildListDelegate(
               [
+                SizedBox(
+                  child: RatingBarIndicator(
+                    rating: calculaRating(reviews),
+                    itemPadding: EdgeInsets.only(bottom: 10),
+                    itemBuilder: (context, index) => Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    itemCount: 5,
+                    direction: Axis.horizontal,
+                  ),
+                ),
                 SizedBox(height: 5),
                 Text(
                   widget.singularity.title,
@@ -181,7 +234,12 @@ class _SingularityPageState extends State<SingularityPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
+                SocialShareBar(
+                    addXp: addXp,
+                    rating: calculaRating(reviews),
+                    singularity: widget.singularity),
+                SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
@@ -211,11 +269,200 @@ class _SingularityPageState extends State<SingularityPage> {
                     ),
                   ),
                 ),
+                SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Avaliações",
+                    softWrap: true,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Constants.textColor1,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                reviews.isEmpty ? SizedBox():ReviewList(reviews: reviews),
+                SizedBox(height: 10),
+                TextButton.icon(
+                  // <-- TextButton
+                  // onPressed: () {
+                  //   openDialogue();
+                  // },
+                  onPressed: userStore.user == null ? null : ()=>{openDialogue()},
+                  icon: Icon(
+                    Icons.add_circle_outline,
+                    size: 24.0,
+                  ),
+                  label: Text('Nova Avaliação'),
+                ),
               ],
             ),
           )
         ],
       ),
     );
+  }
+
+  Future openDialogue() => showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: 500,
+                  child: Column(children: [
+                    Text(
+                      "Faça uma avaliação ",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    RatingBar.builder(
+                      initialRating: 0,
+                      minRating: 1,
+                      maxRating: 5,
+                      direction: Axis.horizontal,
+                      allowHalfRating: false,
+                      itemCount: 5,
+                      itemPadding: EdgeInsets.only(top: 10, bottom: 10),
+                      itemBuilder: (context, _) =>
+                          Icon(Icons.star, color: Colors.amber),
+                      onRatingUpdate: (value) {
+                        setState(() {
+                          ratingReview = value;
+                        });
+                      },
+                    ),
+                    TextField(
+                      controller: commentController,
+                      autocorrect: true,
+                      minLines: 1,
+                      maxLines: 3,
+                      maxLength: 120,
+                      // decoration: InputDecoration(hintText: "Comente algo"),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: Text(
+                    'Enviar',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () async {
+                    var result = await addNewReview(
+                        userStore.user?.id ?? "",
+                        widget.singularity.id,
+                        commentController.text.trim(),
+                        ratingReview);
+                    if (result) {
+                      Navigator.of(context).pop(true);
+                      await openCongratulationDialogue('Obrigado pela avaliação!', 100);
+                    }
+                  },
+                )
+              ]));
+
+  Future openCongratulationDialogue(String text, int points) =>
+      showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+                  content: SingleChildScrollView(
+                      child: SizedBox(
+                    width: 500,
+                    child: SizedBox(
+                      width: 200,
+                      child: Column(children: [
+                        Lottie.asset(
+                          'assets/lottie/64963-topset-complete.json',
+                        ),
+                        Text(text,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            )),
+                        Text(userStore.user==null? 'Faça login para acumular suas Crias!':"Você recebeu $points Crias.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.greenAccent,
+                            )),
+                      ]),
+                    ),
+                  )),
+                  actions: [
+                    TextButton(
+                      child: Text(
+                        'Voltar',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                    )
+                  ]));
+
+  addNewReview(String creatorId, String singularityId, String comment, double rating) async {
+    if (userStore.user == null) return false;
+
+    bool? reviewAdded = await service.addReview(
+        creator: creatorId,
+        singularity: singularityId,
+        comment: comment,
+        rating: rating);
+
+    if (reviewAdded) {
+      await addXp(100);
+    }
+
+    return reviewAdded;
+  }
+
+  addXp(int amount) async {
+    var id = userStore.user?.id ?? "";
+
+    if (id == "") {
+      return;
+    }
+
+    User? user = await userService.addXp(id: id, amount: amount);
+
+    if (user != null) {
+      userStore.setUser(user);
+    }
+  }
+
+  double calculaRating(List<Review> reviews) {
+    var size = reviews.length;
+    if (size == 0) return 0.0;
+
+    var sum = 0.0;
+    for (Review review in reviews) {
+      sum += review.rating;
+    }
+    var average = sum / reviews.length;
+    var averageTruncate = (average * 100).truncate() / 100;
+
+    setState(() {
+      rating = averageTruncate;
+    });
+    return averageTruncate;
   }
 }

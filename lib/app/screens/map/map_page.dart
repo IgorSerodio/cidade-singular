@@ -8,9 +8,14 @@ import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
+
+import 'dart:ui' as ui;
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -20,7 +25,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final Completer<GoogleMapController> _controller = Completer();
+  late GoogleMapController _controller;
   SingularityService service = Modular.get();
   CityStore cityStore = Modular.get();
   bool loading = false;
@@ -63,6 +68,18 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  changeMapMode() {
+      getJsonFile("assets/images/mapMode.json").then(setMapStyle);
+  }
+
+  Future<String> getJsonFile(String path) async {
+    return await rootBundle.loadString(path);
+  }
+
+  void setMapStyle(String mapStyle) {
+    _controller.setMapStyle(mapStyle);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,8 +96,10 @@ class _MapPageState extends State<MapPage> {
                 target: cityStore.city.latLng,
                 zoom: 13,
               ),
-              onMapCreated: (GoogleMapController controller) async {
-                _controller.complete(controller);
+              onMapCreated: (GoogleMapController controller) {
+                _controller = controller;
+                changeMapMode();
+                setState(() {});
               },
               markers: markers,
             ),
@@ -139,34 +158,34 @@ class _MapPageState extends State<MapPage> {
 
   Future<Map<String, BitmapDescriptor>> loadBitmapIcons() async {
     return {
-      "MUSIC": await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(),
-        "assets/images/music.png",
+      "MUSIC": BitmapDescriptor.fromBytes(
+        await getBytesFromAsset("assets/images/music.png", 100)
       ),
-      "ARTS": await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(),
-        "assets/images/art.png",
+      "ARTS":  BitmapDescriptor.fromBytes(
+        await getBytesFromAsset("assets/images/art.png", 100)
       ),
-      "CRAFTS": await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(),
-        "assets/images/crafts.png",
+      "CRAFTS":  BitmapDescriptor.fromBytes(
+        await getBytesFromAsset("assets/images/crafts.png", 100)
       ),
-      "FILM": await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(),
-        "assets/images/film.png",
+      "FILM":  BitmapDescriptor.fromBytes(
+        await getBytesFromAsset("assets/images/film.png", 100)
       ),
-      "GASTRONOMY": await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(),
-        "assets/images/gastronomy.png",
+      "GASTRONOMY":  BitmapDescriptor.fromBytes(
+        await getBytesFromAsset("assets/images/gastronomy.png", 100)
       ),
-      "LITERATURE": await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(),
-        "assets/images/book.png",
+      "LITERATURE":  BitmapDescriptor.fromBytes(
+        await getBytesFromAsset("assets/images/book.png", 100)
       ),
-      "DESIGN": await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(200, 200)),
-        "assets/images/design.png",
+      "DESIGN":  BitmapDescriptor.fromBytes(
+        await getBytesFromAsset("assets/images/design.png", 100)
       ),
     };
+  }
+
+  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 }
