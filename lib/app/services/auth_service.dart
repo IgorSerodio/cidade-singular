@@ -1,4 +1,3 @@
-import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:dio/dio.dart';

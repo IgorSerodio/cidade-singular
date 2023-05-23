@@ -55,7 +55,7 @@ class SocialShareBar extends StatelessWidget {
                 print(data);
               });
             },
-            child: Icon(Icons.whatsapp),
+            child: Icon(Icons.adobe_outlined),
           ),
           ElevatedButton(
             child: FaIcon(FontAwesomeIcons.twitter),

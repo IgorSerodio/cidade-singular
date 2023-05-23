@@ -2,7 +2,6 @@ import 'package:cidade_singular/app/screens/home/home_page.dart';
 import 'package:cidade_singular/app/screens/login/login_page.dart';
 import 'package:cidade_singular/app/screens/register/register_page.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
-import 'package:cidade_singular/app/screens/spash/splash_page.dart';
 import 'package:cidade_singular/app/screens/opening/opening_page.dart';
 import 'package:cidade_singular/app/services/city_service.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';

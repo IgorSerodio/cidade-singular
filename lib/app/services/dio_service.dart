@@ -2,7 +2,7 @@ import 'package:cidade_singular/app/config.dart';
 import 'package:dio/dio.dart';
 
 class DioService {
-  Dio _dio = Dio(BaseOptions(baseUrl: Config.apiURL));
+  final Dio _dio = Dio(BaseOptions(baseUrl: Config.apiURL));
 
   Dio get dio => _dio;
 

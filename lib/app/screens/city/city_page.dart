@@ -1,4 +1,3 @@
-import 'package:cidade_singular/app/models/city.dart';
 import 'package:cidade_singular/app/screens/city/choose_city_dialog.dart';
 import 'package:cidade_singular/app/services/city_service.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';

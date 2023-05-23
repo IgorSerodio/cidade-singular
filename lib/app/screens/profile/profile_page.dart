@@ -1,5 +1,4 @@
 import 'package:cidade_singular/app/models/user.dart';
-import 'package:cidade_singular/app/screens/login/login_page.dart';
 import 'package:cidade_singular/app/screens/opening/opening_page.dart';
 
 import 'package:cidade_singular/app/services/auth_service.dart';
@@ -247,7 +246,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ..text = user.type.value +
                               ((user.type == UserType.CURATOR &&
                                       user.curator_type != null)
-                                  ? " de " + (user.curator_type?.value ?? "")
+                                  ? " de ${user.curator_type?.value ?? ""}"
                                   : "")),
                   ],
                 );
