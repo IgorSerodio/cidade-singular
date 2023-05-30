@@ -15,8 +15,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:ui' as ui;
 
-import 'dart:ui' as ui;
-
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
 
@@ -34,10 +32,9 @@ class _MapPageState extends State<MapPage> {
   @override
   initState() {
     super.initState();
-    Timer.periodic(const Duration(milliseconds: 100), (Timer _) {
-      updateAvatar();
-    });
     addCustomIcon();
+    updateAvatar();
+    Timer.periodic(const Duration(milliseconds: 200), (Timer _) => updateAvatar());
     getSingularites();
   }
 
@@ -67,7 +64,7 @@ class _MapPageState extends State<MapPage> {
         ),
       );
     }).toSet();
-    newMarkers.add(buildAvatar());
+    newMarkers.add(avatar);
     setState(() {
       markers = newMarkers;
       loading = false;
@@ -216,23 +213,19 @@ class _MapPageState extends State<MapPage> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 
-  Marker buildAvatar(){
-    late Marker avatar;
-    getUserCurrentLocation().then((value) async {
-      avatar = Marker(
-          markerId: const MarkerId("main"),
-          position: LatLng(value.latitude, value.longitude),
-          draggable: false,
-          icon: markerIcon
-      );
-    });
-    return avatar;
-  }
+  late Marker avatar;
 
   void updateAvatar() {
     getUserCurrentLocation().then((value) async {
       setState(() {
-        markers.add(buildAvatar());
+        avatar = Marker(
+            markerId: const MarkerId("main"),
+            position: LatLng(value.latitude, value.longitude),
+            draggable: false,
+            icon: markerIcon
+        );
+        markers.remove(avatar);
+        markers.add(avatar);
       });
     });
   }
