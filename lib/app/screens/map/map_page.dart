@@ -67,6 +67,7 @@ class _MapPageState extends State<MapPage> {
         ),
       );
     }).toSet();
+    newMarkers.add(buildAvatar());
     setState(() {
       markers = newMarkers;
       loading = false;
@@ -215,17 +216,23 @@ class _MapPageState extends State<MapPage> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 
+  Marker buildAvatar(){
+    late Marker avatar;
+    getUserCurrentLocation().then((value) async {
+      avatar = Marker(
+          markerId: const MarkerId("main"),
+          position: LatLng(value.latitude, value.longitude),
+          draggable: false,
+          icon: markerIcon
+      );
+    });
+    return avatar;
+  }
+
   void updateAvatar() {
     getUserCurrentLocation().then((value) async {
       setState(() {
-        markers.add(
-          Marker(
-            markerId: const MarkerId("main"),
-            position: LatLng(value.latitude, value.longitude),
-            draggable: false,
-            icon: markerIcon
-          )
-        );
+        markers.add(buildAvatar());
       });
     });
   }
