@@ -61,7 +61,7 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
     ];
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: types
           .map(
@@ -88,36 +88,20 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
       child: Opacity(
         opacity: isSelected ? 1 : 1,
         child: Container(
-          decoration: BoxDecoration(
-            color: Constants.getColor(type.toString().split(".").last),
-            borderRadius: BorderRadius.circular(100),
-            boxShadow: [
-              BoxShadow(
-                offset: Offset(2, 2),
-                blurRadius: 5,
-                color: isSelected ? Colors.black45 : Colors.black26,
-              ),
-            ],
+          decoration: BoxDecoration(image: DecorationImage(
+              image: AssetImage("assets/images/_${type.toString().split(".").last}.png"),
+              fit: BoxFit.fitWidth,),
           ),
           padding: EdgeInsets.symmetric(
             horizontal: isSelected ? 12 : 10,
-            vertical: isSelected ? 6 : 5,
+            vertical: isSelected ? 30 : 25,
           ),
           transform: Transform.translate(
-            offset: Offset(isSelected ? -120 : -120, 0),
+            offset: Offset(isSelected ? -110 : -110, 0),
           ).transform,
           width: isSelected ? 180 : 160,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(type.value),
-              SizedBox(width: 10),
-              SvgPicture.asset(
-                  "assets/images/${type.toString().split(".").last}.svg",
-                  width: isSelected ? 40 : 20)
-            ],
-          ),
+          /*child: Center(
+              child: Text(type.value)),*/
         ),
       ),
     );
