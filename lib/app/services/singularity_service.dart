@@ -64,6 +64,15 @@ class SingularityService {
         visitingHours: "",
         photos: [],
         latLng: LatLng(-7.229543, -35.883473)));
+    if (query.containsKey("type")){
+      List<Singularity> temp = [];
+      for(Singularity sing in sings){
+        if(query["type"]==sing.type){
+          temp.add(sing);
+        }
+      }
+      sings = temp;
+    }
     return sings;
   }
 }

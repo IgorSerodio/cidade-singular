@@ -34,7 +34,7 @@ class _MapPageState extends State<MapPage> {
   @override
   initState() {
     super.initState();
-    Timer.periodic(const Duration(milliseconds: 200), (Timer _) {
+    Timer.periodic(const Duration(milliseconds: 100), (Timer _) {
       updateAvatar();
     });
     addCustomIcon();
