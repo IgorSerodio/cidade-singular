@@ -34,7 +34,7 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     addCustomIcon();
     updateAvatar();
-    Timer.periodic(const Duration(milliseconds: 200), (Timer _) => updateAvatar());
+    Timer.periodic(const Duration(seconds: 1), (Timer _) => updateAvatar());
     getSingularites();
   }
 
@@ -71,16 +71,12 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  void addCustomIcon() {
-    BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(81, 120)), "assets/images/marker.png")
-        .then(
-          (icon) {
-        setState(() {
-          markerIcon = icon;
-        });
-      },
-    );
+  void addCustomIcon() async {
+    const int tw = 120;
+    ByteData data = await rootBundle.load("assets/images/marker.png");
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: tw);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    markerIcon =  BitmapDescriptor.fromBytes((await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List());
   }
 
   Future<Position> getUserCurrentLocation() async {
@@ -111,7 +107,7 @@ class _MapPageState extends State<MapPage> {
         children: [
           Positioned.fill(
             child: GoogleMap(
-              myLocationEnabled: true,
+              myLocationEnabled: false,
               myLocationButtonEnabled: false,
               liteModeEnabled: false,
               rotateGesturesEnabled: false,

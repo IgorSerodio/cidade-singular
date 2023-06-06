@@ -86,24 +86,38 @@ class _HomePageState extends State<HomePage> {
               right: 0,
               left: 0,
               child: Container(
-                height: 70,
                 margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      offset: Offset(4, 4),
-                      blurRadius: 5,
-                      color: Colors.black26,
-                    )
-                  ],
-                ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: menuItens,
-                ),
-              ),
+                  children: [
+                    Image(
+                        image: AssetImage("assets/images/board_edge.png"),
+                        height: 70,
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 70,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage("assets/images/board_mid_sec.png"),
+                              fit: BoxFit.fill,
+                            )
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: menuItens,
+                        ),
+                      )
+                    ),
+                    Transform.flip(
+                      flipX: true,
+                      child: Image(
+                        image: AssetImage("assets/images/board_edge.png"),
+                        height: 70
+                      )
+                    )
+                  ]
+                )
+              )
             )
           ],
         ),
