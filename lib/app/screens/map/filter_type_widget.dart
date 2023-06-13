@@ -65,7 +65,7 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: types
           .map(
-            (type) => type.value == selected.value
+            (type) => Expanded(child: type.value == selected.value
                 ? AnimatedBuilder(
                     animation: animation,
                     child: buildTypeWidget(type, isSelected: true),
@@ -75,35 +75,34 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
                     ),
                   )
                 : buildTypeWidget(type, isSelected: false),
+            )
           )
           .toList(),
     );
   }
 
   GestureDetector buildTypeWidget(CuratorType type, {bool isSelected = false}) {
+    const double iniWidth = 250;
+    const double sizeUp = 1.25;
+
     return GestureDetector(
       onTap: () {
         onSelect(type);
       },
-      child: Opacity(
-        opacity: isSelected ? 1 : 1,
-        child: Container(
-          decoration: BoxDecoration(image: DecorationImage(
-              image: AssetImage("assets/images/_${type.toString().split(".").last}.png"),
-              fit: BoxFit.fitWidth,),
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 12 : 10,
-            vertical: isSelected ? 30 : 25,
+      child: Container(
+          decoration: BoxDecoration(image:
+            DecorationImage(
+              image: Image.asset("assets/images/_${type.toString().split(".").last}.png").image,
+              fit: BoxFit.contain
+            ),
           ),
           transform: Transform.translate(
-            offset: Offset(isSelected ? -110 : -110, 0),
+            offset: Offset(isSelected ? -160 : -150, 0),
           ).transform,
-          width: isSelected ? 180 : 160,
+          width: isSelected ? iniWidth*sizeUp : iniWidth,
           /*child: Center(
               child: Text(type.value)),*/
         ),
-      ),
     );
   }
 }

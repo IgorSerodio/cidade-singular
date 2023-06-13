@@ -134,8 +134,8 @@ class _MapPageState extends State<MapPage> {
               ),
             ),
           Positioned.fill(
-            top: 100,
-            bottom: 150,
+            top: 0,
+            bottom: 86,
             child: FilterTypeWidget(
               onChoose: (type) {
                 getSingularites(type: type);
@@ -202,7 +202,7 @@ class _MapPageState extends State<MapPage> {
     };
   }
 
-  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+  static Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
