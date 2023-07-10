@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
+import 'package:cidade_singular/app/screens/map/singularity_info.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
@@ -34,8 +35,8 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     addCustomIcon();
     updateAvatar();
-    Timer.periodic(const Duration(seconds: 1), (Timer _) => updateAvatar());
     getSingularites();
+    Timer.periodic(const Duration(seconds: 1), (Timer _) => updateAvatar());
   }
 
   Set<Marker> markers = {};
@@ -55,13 +56,7 @@ class _MapPageState extends State<MapPage> {
         markerId: markerId,
         position: sing.latLng,
         icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
-        infoWindow: InfoWindow(
-          onTap: () async {
-            Modular.to.pushNamed(SingularityPage.routeName, arguments: sing);
-          },
-          title: sing.title,
-          snippet: sing.address,
-        ),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityInfo(singularity: sing)),),
       );
     }).toSet();
     newMarkers.add(avatar);
