@@ -15,6 +15,7 @@ class SingularityInfo extends StatefulWidget {
 class _SingularityInfoState extends State<SingularityInfo> {
   _SingularityInfoState();
 
+  bool isPressed = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,6 +23,15 @@ class _SingularityInfoState extends State<SingularityInfo> {
             title: Text(widget.singularity.title, maxLines: 3,),
             centerTitle: true,
             backgroundColor: Colors.red,
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.favorite),
+                tooltip: "Adicionar aos favoritos",
+                onPressed: () { pressed(); },
+                color:(isPressed) ? Colors.blue
+                  : Colors.white
+              )
+            ]
         ),
         body: SingleChildScrollView(
             child: Column(
@@ -58,6 +68,16 @@ class _SingularityInfoState extends State<SingularityInfo> {
             )
           )
         );
+  }
+
+  void pressed() {
+    if (isPressed){
+      setState(() {
+        isPressed = false; });
+    }else {
+      setState(() {
+        isPressed = true; });
+    }
   }
 
   List<Widget> getPhotos(List<String> urls) {
