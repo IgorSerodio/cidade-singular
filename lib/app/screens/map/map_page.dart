@@ -20,7 +20,7 @@ class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
 
   @override
-  _MapPageState createState() => _MapPageState();
+  createState() => _MapPageState();
 }
 
 class _MapPageState extends State<MapPage> {
@@ -56,7 +56,7 @@ class _MapPageState extends State<MapPage> {
         markerId: markerId,
         position: sing.latLng,
         icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityInfo(singularity: sing)),),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),),
       );
     }).toSet();
     newMarkers.add(avatar);

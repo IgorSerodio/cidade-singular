@@ -87,15 +87,15 @@ class CuratorWidget extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                         color: Constants.getColor(
-                            user.curator_type.toString().split(".").last),
+                            user.curatorType.toString().split(".").last),
                         borderRadius: BorderRadius.circular(50)),
                     padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(user.curator_type?.value ?? ""),
+                        Text(user.curatorType?.value ?? ""),
                         SvgPicture.asset(
-                            "assets/images/${user.curator_type.toString().split(".").last}.svg",
+                            "assets/images/${user.curatorType.toString().split(".").last}.svg",
                             width: 20)
                       ],
                     ),

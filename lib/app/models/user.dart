@@ -6,7 +6,7 @@ class User {
   String name;
   String description;
   UserType type;
-  CuratorType? curator_type;
+  CuratorType? curatorType;
   String picture;
   City? city;
   int xp;
@@ -17,7 +17,7 @@ class User {
     this.city,
     this.description = "",
     this.type = UserType.VISITOR,
-    this.curator_type,
+    this.curatorType,
     this.picture = "",
     required this.xp,
   });
@@ -30,7 +30,7 @@ class User {
         name = map["name"],
         description = map["description"],
         type = UserType._from[map["type"]],
-        curator_type = map["curator_type"] != null
+        curatorType = map["curator_type"] != null
             ? CuratorType._from[map["curator_type"]]
             : null,
         picture = map["picture"],
