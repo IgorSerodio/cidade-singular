@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
-import 'package:cidade_singular/app/screens/map/singularity_info.dart';
+import 'package:custom_marker/marker_icon.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
@@ -23,17 +23,44 @@ class MapPage extends StatefulWidget {
   createState() => _MapPageState();
 }
 
+class _AvatarMarker extends StatelessWidget{
+
+  const _AvatarMarker(this.globalKey);
+  final GlobalKey globalKey;
+
+  @override
+  Widget build(BuildContext context) {
+    double avatarHeight = 180.0;
+    return RepaintBoundary(
+      key: globalKey,
+      child: SizedBox(
+        height: avatarHeight,
+        width: avatarHeight*2/3,
+        child: Stack(
+          children: [
+            Image.asset("assets/images/avatar.png", fit: BoxFit.cover,),
+            Image.asset("assets/images/accessories/plaid_shirt.png", fit: BoxFit.cover,),
+            Image.asset("assets/images/accessories/cangaceiro_hat.png", fit: BoxFit.cover,),
+          ],
+        ),
+      )
+    );
+  }
+
+
+}
+
 class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
   SingularityService service = Modular.get();
   CityStore cityStore = Modular.get();
   bool loading = false;
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  final GlobalKey globalKey = GlobalKey();
 
   @override
   initState() {
     super.initState();
-    addCustomIcon();
     updateAvatar();
     getSingularites();
     Timer.periodic(const Duration(seconds: 1), (Timer _) => updateAvatar());
@@ -67,11 +94,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   void addCustomIcon() async {
-    const int tw = 120;
-    ByteData data = await rootBundle.load("assets/images/marker.png");
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: tw);
-    ui.FrameInfo fi = await codec.getNextFrame();
-    markerIcon =  BitmapDescriptor.fromBytes((await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List());
+    BitmapDescriptor temp = await MarkerIcon.widgetToIcon(globalKey);
+    if(temp!=null) markerIcon = temp;
   }
 
   Future<Position> getUserCurrentLocation() async {
@@ -100,8 +124,8 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: GoogleMap(
+          _AvatarMarker(globalKey),
+          GoogleMap(
               myLocationEnabled: false,
               myLocationButtonEnabled: false,
               liteModeEnabled: false,
@@ -117,7 +141,6 @@ class _MapPageState extends State<MapPage> {
                 setState(() {});
               },
               markers: markers,
-            ),
           ),
           if (loading)
             Container(
@@ -208,6 +231,7 @@ class _MapPageState extends State<MapPage> {
 
   void updateAvatar() {
     getUserCurrentLocation().then((value) async {
+      if(markerIcon == BitmapDescriptor.defaultMarker) addCustomIcon();
       setState(() {
         avatar = Marker(
             markerId: const MarkerId("main"),
