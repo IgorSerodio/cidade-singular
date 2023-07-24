@@ -1,6 +1,10 @@
 import 'package:cidade_singular/app/models/city.dart';
 
 class User {
+  static const HEAD = 0;
+  static const TORSO = 1;
+  static const LEGS = 2;
+
   String id;
   String email;
   String name;
@@ -9,6 +13,8 @@ class User {
   CuratorType? curatorType;
   String picture;
   City? city;
+  List<String> accessories;
+  List<String> equipped;
   int xp;
   User({
     required this.id,
@@ -19,6 +25,8 @@ class User {
     this.type = UserType.VISITOR,
     this.curatorType,
     this.picture = "",
+    required this.accessories,
+    required this.equipped,
     required this.xp,
   });
 
@@ -34,6 +42,8 @@ class User {
             ? CuratorType._from[map["curator_type"]]
             : null,
         picture = map["picture"],
+        accessories = List<String>.from(map["accessories"]),
+        equipped = List<String>.from(map["equipped"]),
         xp = map["xp"],
         city = map["city"] == null || (map['city'] is String)
             ? null

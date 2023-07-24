@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
+import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:custom_marker/marker_icon.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
@@ -25,8 +26,9 @@ class MapPage extends StatefulWidget {
 
 class _AvatarMarker extends StatelessWidget{
 
-  const _AvatarMarker(this.globalKey);
+  _AvatarMarker(this.globalKey);
   final GlobalKey globalKey;
+  final UserStore userStore = Modular.get();
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +41,14 @@ class _AvatarMarker extends StatelessWidget{
         child: Stack(
           children: [
             Image.asset("assets/images/avatar.png", fit: BoxFit.cover,),
-            Image.asset("assets/images/accessories/plaid_shirt.png", fit: BoxFit.cover,),
-            Image.asset("assets/images/accessories/cangaceiro_hat.png", fit: BoxFit.cover,),
+            if (userStore.user != null && userStore.user!.equipped[User.LEGS] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.LEGS]}.png", fit: BoxFit.cover,),
+            if (userStore.user != null && userStore.user!.equipped[User.TORSO] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.TORSO]}.png", fit: BoxFit.cover,),
+            if (userStore.user != null && userStore.user!.equipped[User.HEAD] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.HEAD]}.png", fit: BoxFit.cover,),
           ],
         ),
       )
     );
   }
-
-
 }
 
 class _MapPageState extends State<MapPage> {
@@ -61,7 +62,6 @@ class _MapPageState extends State<MapPage> {
   @override
   initState() {
     super.initState();
-    updateAvatar();
     getSingularites();
     Timer.periodic(const Duration(seconds: 1), (Timer _) => updateAvatar());
   }
@@ -86,7 +86,7 @@ class _MapPageState extends State<MapPage> {
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),),
       );
     }).toSet();
-    newMarkers.add(avatar);
+    if(avatar!=null) newMarkers.add(avatar!);
     setState(() {
       markers = newMarkers;
       loading = false;
@@ -227,7 +227,7 @@ class _MapPageState extends State<MapPage> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 
-  late Marker avatar;
+  Marker? avatar;
 
   void updateAvatar() {
     getUserCurrentLocation().then((value) async {
@@ -240,7 +240,7 @@ class _MapPageState extends State<MapPage> {
             icon: markerIcon
         );
         markers.remove(avatar);
-        markers.add(avatar);
+        markers.add(avatar!);
       });
     });
   }

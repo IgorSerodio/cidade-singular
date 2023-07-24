@@ -89,6 +89,8 @@ class UserService {
     String? type,
     String? curator_type,
     String? city,
+    List<String>? accessories,
+    List<String>? equipped,
     int? xp,
     required String id,
   }) async {
@@ -101,6 +103,8 @@ class UserService {
           if (photo != null) "picture": base64Encode(await photo.readAsBytes()),
           if (type != null) "type": type,
           if (curator_type != null) "curator_type": curator_type,
+          if (accessories != null) "accessories": accessories,
+          if (equipped != null) "equipped": equipped,
           if (city != null) "city": city,
           if (xp != null) "xp": xp,
         },

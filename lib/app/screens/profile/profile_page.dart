@@ -20,6 +20,10 @@ enum AccessoryType {
 }
 
 class _AccessorySelector {
+  final int HEAD = 0;
+  final int TORSO = 1;
+  final int LEGS = 2;
+
   List<String> headItems = [];
   List<String> torsoItems = [];
   List<String> legsItems = [];
@@ -32,13 +36,25 @@ class _AccessorySelector {
   final torsoAccessories = <String> {'green_dress', 'plaid_shirt'};
   final legsAccessories = <String> {};
 
-  _AccessorySelector(List<String> items) {
-    headItems = headAccessories.intersection(items.toSet()).toList();
+  _AccessorySelector(List<String> items, List<String> equipped) {
+    for(String item in items){
+      if(headAccessories.contains(item)){
+        headItems.add(item);
+      } else if(torsoAccessories.contains(item)){
+        torsoItems.add(item);
+      } else if(legsAccessories.contains(item)){
+        legsItems.add(item);
+      }
+    }
     headItems.add("none");
-    torsoItems = torsoAccessories.intersection(items.toSet()).toList();
     torsoItems.add("none");
-    legsItems = legsAccessories.intersection(items.toSet()).toList();
     legsItems.add("none");
+
+    if(equipped.isNotEmpty) {
+      headIdx = headItems.indexOf(equipped[User.HEAD]!);
+      torsoIdx = torsoItems.indexOf(equipped[User.TORSO]!);
+      legsIdx = legsItems.indexOf(equipped[User.LEGS]!);
+    }
   }
 
   void _changeIdx(AccessoryType type, int value){
@@ -92,8 +108,91 @@ class _AccessorySelector {
     );
   }
 
-  void save(){}
+  List<String> getEquipped() {
+    return [headItems.elementAt(headIdx), torsoItems.elementAt(torsoIdx), legsItems.elementAt(legsIdx)];
+  }
 }
+
+/*
+* _AccessorySelector(List<String> items) {
+    for(String item in items){
+      if(headAccessories.contains(item)){
+        headItems.add(item);
+      } else if(torsoAccessories.contains(item)){
+        torsoItems.add(item);
+      } else if(legsAccessories.contains(item)){
+        legsItems.add(item);
+      }
+    }
+    headItems.add("none");
+    headIdx = headItems.indexOf(userStore.user!.equipped["head"]!);
+    torsoItems.add("none");
+    torsoIdx = headItems.indexOf(userStore.user!.equipped["torso"]!);
+    legsItems.add("none");
+    legsIdx = legsItems.indexOf(userStore.user!.equipped["legs"]!);
+  }
+
+  void _changeIdx(AccessoryType type, int value){
+    switch(type){
+      case AccessoryType.head: {
+        headIdx = (headIdx + value)%headItems.length;
+      }
+      break;
+      case AccessoryType.torso: {
+        torsoIdx = (torsoIdx + value)%torsoItems.length;
+      }
+      break;
+      case AccessoryType.legs: {
+        legsIdx = (legsIdx + value)%legsItems.length;
+      }
+      break;
+    }
+  }
+
+  void next(AccessoryType type){
+    _changeIdx(type, 1);
+  }
+
+  void previous(AccessoryType type){
+    _changeIdx(type, -1);
+  }
+
+  Widget getCurrentItem(AccessoryType type, double height, double width){
+    String item;
+    switch(type){
+      case AccessoryType.head: {
+        item = headItems.elementAt(headIdx);
+      }
+      break;
+      case AccessoryType.torso: {
+        item = torsoItems.elementAt(torsoIdx);
+      }
+      break;
+      case AccessoryType.legs: {
+        item = legsItems.elementAt(legsIdx);
+      }
+      break;
+    }
+
+    if(item=="none") return SizedBox.shrink();
+
+    return SizedBox(
+      height: height,
+      width: width,
+      child: Image.asset("assets/images/accessories/$item.png", fit: BoxFit.cover),
+    );
+  }
+
+  void save() async {
+    User? updated = await userService.update(id: userStore.user?.id ?? "", equipped: {"head": headItems.elementAt(headIdx),
+                                                                                      "torso": torsoItems.elementAt(torsoIdx),
+                                                                                      "legs": legsItems.elementAt(legsIdx)});
+    if (updated != null) {
+      userStore.setUser(updated);
+    }
+  }
+}
+* */
 
 class ProfilePage extends StatefulWidget {
   _AccessorySelector? accessorySelector;
@@ -167,6 +266,16 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => loadingName = false);
   }
 
+  void updateEquipped() async {
+    print(widget.accessorySelector!.getEquipped());
+    User? updated = await userService.update(
+        id: userStore.user?.id ?? "", equipped: widget.accessorySelector!.getEquipped());
+    if (updated != null) {
+      print("!${updated.equipped}");
+      userStore.setUser(updated);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,7 +300,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Observer(builder: (context) {
           User? user = userStore.user;
           List<String> accessories = ['cangaceiro_hat', 'green_dress', 'plaid_shirt'];
-          widget.accessorySelector ??= _AccessorySelector(accessories);
+          widget.accessorySelector ??= _AccessorySelector(accessories, (user!=null)? user.equipped: []);
           return user == null
               ? Align(
                 child: Text(
@@ -423,6 +532,14 @@ class _ProfilePageState extends State<ProfilePage> {
                               ],
                             ),
                           ],
+                      ),
+                    ),
+                    Center(
+                      child: TextButton(
+                        onPressed: () async {
+                          updateEquipped();
+                        },
+                        child: Text("Salvar"),
                       ),
                     ),
                     SizedBox(height: 90)
