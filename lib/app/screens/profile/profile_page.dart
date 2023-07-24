@@ -267,11 +267,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void updateEquipped() async {
-    print(widget.accessorySelector!.getEquipped());
     User? updated = await userService.update(
         id: userStore.user?.id ?? "", equipped: widget.accessorySelector!.getEquipped());
     if (updated != null) {
-      print("!${updated.equipped}");
       userStore.setUser(updated);
     }
   }
