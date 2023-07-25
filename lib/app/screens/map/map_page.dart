@@ -63,7 +63,9 @@ class _MapPageState extends State<MapPage> {
   initState() {
     super.initState();
     getSingularites();
-    Timer.periodic(const Duration(seconds: 1), (Timer _) => updateAvatar());
+    Timer.periodic(const Duration(seconds: 1), (Timer _) {
+      if(mounted) updateAvatar();
+    });
   }
 
   Set<Marker> markers = {};
