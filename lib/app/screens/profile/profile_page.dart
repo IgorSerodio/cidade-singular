@@ -4,6 +4,7 @@ import 'package:cidade_singular/app/screens/opening/opening_page.dart';
 import 'package:cidade_singular/app/services/auth_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
+import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -236,14 +237,24 @@ class _ProfilePageState extends State<ProfilePage> {
                           ? CircularProgressIndicator()
                           : Stack(
                               children: [
-                                CircleAvatar(
-                                  radius: 60,
-                                  foregroundImage: NetworkImage(user.picture),
-                                  onForegroundImageError: (_, __) {},
-                                  child: Text(
-                                    user.name[0],
-                                    style: TextStyle(fontSize: 38),
-                                  ),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(300),
+                                  child: (user.picture == "")
+                                    ?Container(
+                                      width: 150,
+                                      height: 150,
+                                      color: Colors.blue,
+                                      child: Center(
+                                        child: Text(
+                                          user.name[0],
+                                          style: TextStyle(fontSize: 50),
+                                        ),
+                                      )
+                                    )
+                                    :SizedBox.square(
+                                      dimension: 150,
+                                      child: URLImage(user.picture),
+                                    )
                                 ),
                                 Positioned(
                                   bottom: 0,

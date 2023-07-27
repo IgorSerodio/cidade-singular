@@ -1,6 +1,7 @@
 import 'package:cidade_singular/app/models/city.dart';
 import 'package:cidade_singular/app/services/city_service.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
+import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -55,11 +56,10 @@ class _ChooseCityDialogState extends State<ChooseCityDialog> {
                           height: 80,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(2),
-                            child: Image.network(
+                            child: URLImage(
                               city.pictures.isNotEmpty
                                   ? city.pictures.first
-                                  : "https://via.placeholder.com/150",
-                              fit: BoxFit.cover,
+                                  : "https://via.placeholder.com/150"
                             ),
                           ),
                         ),
