@@ -1,4 +1,5 @@
 import 'package:cidade_singular/app/models/user.dart';
+import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -25,14 +26,24 @@ class CuratorWidget extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(width: 15),
-          CircleAvatar(
-            radius: 40,
-            foregroundImage: NetworkImage(user.picture),
-            onForegroundImageError: (_, __) {},
-            child: Text(
-              user.name[0],
-              style: TextStyle(fontSize: 38),
-            ),
+          ClipRRect(
+              borderRadius: BorderRadius.circular(40),
+              child: (user.picture == "")
+                  ?Container(
+                  width: 80,
+                  height: 80,
+                  color: Colors.blue,
+                  child: Center(
+                    child: Text(
+                      user.name[0],
+                      style: TextStyle(fontSize: 30),
+                    ),
+                  )
+                 )
+                  :SizedBox.square(
+                    dimension: 80,
+                    child: URLImage(user.picture),
+                  )
           ),
           SizedBox(width: 15),
           Expanded(
