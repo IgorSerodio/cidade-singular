@@ -15,7 +15,9 @@ class User {
   City? city;
   List<String> accessories;
   List<String> equipped;
+  List<Progress> progress;
   int xp;
+
   User({
     required this.id,
     required this.email,
@@ -27,6 +29,7 @@ class User {
     this.picture = "",
     required this.accessories,
     required this.equipped,
+    required this.progress,
     required this.xp,
   });
 
@@ -44,10 +47,28 @@ class User {
         picture = map["picture"],
         accessories = List<String>.from(map["accessories"]),
         equipped = List<String>.from(map["equipped"]),
+        progress = List<Progress>.from(map["progress"]?.map((item) => Progress.fromMap(item)) ?? []),
         xp = map["xp"],
         city = map["city"] == null || (map['city'] is String)
             ? null
             : City.fromMap(map["city"]);
+}
+
+class Progress {
+  String missionId;
+  int value;
+  int target;
+
+  Progress({
+    required this.missionId,
+    required this.value,
+    required this.target,
+  });
+
+  Progress.fromMap(Map map)
+      : missionId = map["missionId"],
+        value = map["value"],
+        target = map["target"];
 }
 
 enum UserType {
