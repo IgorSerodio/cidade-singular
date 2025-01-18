@@ -91,6 +91,7 @@ class UserService {
     String? city,
     List<String>? accessories,
     List<String>? equipped,
+    List<Progress>? progress,
     int? xp,
     required String id,
   }) async {
@@ -105,6 +106,7 @@ class UserService {
           if (curator_type != null) "curator_type": curator_type,
           if (accessories != null) "accessories": accessories,
           if (equipped != null) "equipped": equipped,
+          if (progress != null) "equipped": progress,
           if (city != null) "city": city,
           if (xp != null) "xp": xp,
         },
@@ -148,6 +150,82 @@ class UserService {
         print(e);
       }
       return [];
+    }
+  }
+
+  Future<User?> addMissionsToUser({
+    required String id,
+    required String cityId,
+  }) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/$id/add-missions/$cityId",
+      );
+
+      if (response.data["error"]) {
+        return null;
+      } else {
+        return User.fromMap(response.data["item"]);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      } else {
+        print(e);
+      }
+      return null;
+    }
+  }
+
+  Future<User?> increaseProgress({
+    required String id,
+    required String cityId,
+    required List<String> tags,
+  }) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/$id/progress/$cityId",
+        data: {
+          "tags": tags,
+        },
+      );
+
+      if (response.data["error"]) {
+        return null;
+      } else {
+        return User.fromMap(response.data["item"]);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      } else {
+        print(e);
+      }
+      return null;
+    }
+  }
+
+  Future<User?> giveReward({
+    required String id,
+    required String missionId,
+  }) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/$id/reward/$missionId",
+      );
+
+      if (response.data["error"]) {
+        return null;
+      } else {
+        return User.fromMap(response.data["item"]);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      } else {
+        print(e);
+      }
+      return null;
     }
   }
 

@@ -9,6 +9,7 @@ class Singularity {
   String type;
   List<String> photos;
   LatLng latLng;
+  List<String> tags;
 
   Singularity({
     required this.id,
