@@ -3,12 +3,15 @@ import 'package:cidade_singular/app/services/mission_service.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/models/mission.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:cidade_singular/app/stores/user_store.dart';
 
 class MissionProgressHandler {
-  static UserService userService = Modular.get();
-  static MissionService missionService = Modular.get();
 
   static void handle (List<String> tags, String userId, String cityId) async {
+    UserService userService = Modular.get();
+    MissionService missionService = Modular.get();
+    UserStore userStore = Modular.get();
+
     try{
       User? user = await userService.addMissionsToUser(id: userId, cityId: cityId);
       if (user == null){
@@ -29,7 +32,9 @@ class MissionProgressHandler {
         }
       }
 
-      userService.update(id: userId, progress: newProgress);
+      User? updated = await userService.update(id: userId, progress: newProgress);
+
+      if(updated != null) userStore.setUser(updated);
     } catch (e) {
       print(e);
     }

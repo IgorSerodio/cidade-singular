@@ -7,6 +7,7 @@ import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:custom_marker/marker_icon.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
+import 'package:cidade_singular/app/util/mission_progress_handler.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,7 @@ class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
   SingularityService service = Modular.get();
   CityStore cityStore = Modular.get();
+  UserStore userStore = Modular.get();
   bool loading = false;
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   final GlobalKey globalKey = GlobalKey();
@@ -62,7 +64,7 @@ class _MapPageState extends State<MapPage> {
   @override
   initState() {
     super.initState();
-    getSingularites();
+    getSingularities();
     Timer.periodic(const Duration(seconds: 1), (Timer _) {
       if(mounted) updateAvatar();
     });
@@ -72,7 +74,7 @@ class _MapPageState extends State<MapPage> {
 
   List<Singularity> singularities = [];
 
-  getSingularites({CuratorType? type}) async {
+  getSingularities({CuratorType? type}) async {
     setState(() => loading = true);
     singularities = await service.getSingularities(query: {
       "city": cityStore.city.id,
@@ -85,7 +87,10 @@ class _MapPageState extends State<MapPage> {
         markerId: markerId,
         position: sing.latLng,
         icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),),
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),);
+          if(userStore.user!=null) MissionProgressHandler.handle(["open_singularity", sing.type] + sing.tags, userStore.user?.id ?? "", cityStore.city?.id ?? "");
+        },
       );
     }).toSet();
     if(avatar!=null) newMarkers.add(avatar!);
@@ -158,7 +163,7 @@ class _MapPageState extends State<MapPage> {
             bottom: 86,
             child: FilterTypeWidget(
               onChoose: (type) {
-                getSingularites(type: type);
+                getSingularities(type: type);
               },
             ),
           )
