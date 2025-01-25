@@ -6,7 +6,7 @@ import 'package:cidade_singular/app/screens/map/map_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cidade_singular/app/screens/profile/profile_page.dart';
-
+import 'package:cidade_singular/app/screens/mission/mission_page.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -52,6 +52,11 @@ class _HomePageState extends State<HomePage> {
         name: "Info",
         svgIconPath: "assets/images/info.svg",
         page: CuratorsPage(),
+      ),
+      MenuPageModel(
+        name: "Missões",
+        svgIconPath: "assets/images/info.svg",
+        page: MissionPage(),
       ),
       MenuPageModel(
         name: "Perfil",

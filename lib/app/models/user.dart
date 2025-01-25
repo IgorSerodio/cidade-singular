@@ -58,11 +58,13 @@ class Progress {
   String missionId;
   int value;
   int target;
+  String missionDescription = "";
 
   Progress({
     required this.missionId,
     required this.value,
     required this.target,
+    this.missionDescription = "",
   });
 
   Progress.fromMap(Map map)

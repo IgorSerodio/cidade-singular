@@ -12,7 +12,7 @@ class Mission {
     required this.description,
     required this.tags,
     required this.target,
-    this.reward,
+    required this.reward,
   });
 
   Mission.fromMap(Map<String, dynamic> map)
