@@ -7,6 +7,7 @@ import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/progress.dart';
 import 'mission_widget.dart';
 
 
@@ -45,7 +46,7 @@ class _MissionPageState extends State<MissionPage> {
       for (Mission mission in missions){
         if(userProgress.containsKey(mission.id)){
           Progress? progress = userProgress[mission.id];
-          Progress progressWithDescription = Progress(missionId: progress!.missionId, value: progress!.value, target: progress!.target, missionDescription: mission.description);
+          Progress progressWithDescription = Progress(missionId: progress!.missionId, value: progress!.value, target: progress!.target, missionDescription: mission.description, missionReward: mission.reward);
           if(progress!.value == progress!.target){
             completed.add(progressWithDescription);
           }else{
@@ -71,59 +72,68 @@ class _MissionPageState extends State<MissionPage> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "Missões em andamento",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: pending.length,
-                  itemBuilder: (context, index) {
-                    Progress progress = pending[index];
-                    return MissionProgressWidget(
-                      progress: progress,
-                      margin: EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        bottom: index == pending.length - 1 ? 20 : 10,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "Missões Concluídas",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: completed.length,
-                  itemBuilder: (context, index) {
-                    Progress progress = completed[index];
-                    return MissionProgressWidget(
-                      progress: progress,
-                      completed: true,
-                      margin: EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        bottom: index == completed.length - 1 ? 20 : 10,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              "Missões em andamento",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: pending.length,
+              itemBuilder: (context, index) {
+                Progress progress = pending[index];
+                return MissionProgressWidget(
+                  progress: progress,
+                  margin: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: index == pending.length - 1 ? 20 : 10,
+                  ),
+                );
+              },
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              "Missões Concluídas",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: completed.length,
+              itemBuilder: (context, index) {
+                Progress progress = completed[index];
+                return MissionProgressWidget(
+                  progress: progress,
+                  margin: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: index == completed.length - 1 ? 20 : 10,
+                  ),
+                  onTap: () {
+                    if (progress.target == progress.value && !userStore.user!.accessories.contains(progress.missionReward)) {
+                      setState(() async {
+                        User? uptated = await userService.giveReward(id: userStore.user!.id, missionId: progress.missionId);
+                        if(uptated != null) userStore.setUser(uptated);
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Recompensa coletada: ${progress.missionReward}")),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
-
 }

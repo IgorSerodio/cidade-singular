@@ -1,4 +1,5 @@
 import 'package:cidade_singular/app/models/city.dart';
+import 'package:cidade_singular/app/models/progress.dart';
 
 class User {
   static const HEAD = 0;
@@ -52,25 +53,6 @@ class User {
         city = map["city"] == null || (map['city'] is String)
             ? null
             : City.fromMap(map["city"]);
-}
-
-class Progress {
-  String missionId;
-  int value;
-  int target;
-  String missionDescription = "";
-
-  Progress({
-    required this.missionId,
-    required this.value,
-    required this.target,
-    this.missionDescription = "",
-  });
-
-  Progress.fromMap(Map map)
-      : missionId = map["missionId"],
-        value = map["value"],
-        target = map["target"];
 }
 
 enum UserType {

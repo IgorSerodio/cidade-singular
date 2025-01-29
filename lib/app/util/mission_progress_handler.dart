@@ -5,6 +5,8 @@ import 'package:cidade_singular/app/models/mission.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 
+import '../models/progress.dart';
+
 class MissionProgressHandler {
 
   static void handle (List<String> tags, String userId, String cityId) async {

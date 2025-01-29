@@ -4,7 +4,7 @@ class Mission {
   String description;
   List<String> tags;
   int target;
-  String? reward;
+  String reward;
 
   Mission({
     required this.id,
@@ -21,7 +21,7 @@ class Mission {
         description = map["description"] ?? "",
         tags = List<String>.from(map["tags"] ?? []),
         target = map["target"] ?? 0,
-        reward = map["reward"];
+        reward = map["reward"] ?? "";
 
   Map<String, dynamic> toMap() {
     return {
