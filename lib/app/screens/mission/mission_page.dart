@@ -147,8 +147,8 @@ class _MissionPageState extends State<MissionPage> {
                           onTap: () {
                             if (missionProgress.key.target == missionProgress.key.value && !userStore.user!.accessories.contains(missionProgress.value.reward)) {
                               setState(() async {
-                                User? uptated = await userService.giveReward(id: userStore.user!.id, missionId: missionProgress.key.missionId);
-                                if(uptated != null) userStore.setUser(uptated);
+                                User? updated = await userService.giveReward(id: userStore.user!.id, missionId: missionProgress.key.missionId);
+                                if(updated != null) userStore.setUser(updated);
                               });
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text("Recompensa coletada: ${missionProgress.value.reward}")),
