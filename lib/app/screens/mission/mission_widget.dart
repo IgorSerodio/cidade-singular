@@ -1,17 +1,19 @@
+import 'package:cidade_singular/app/models/mission.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import '../../models/progress.dart';
+import '../../util/colors.dart';
 
 class MissionProgressWidget extends StatelessWidget {
-  final Progress progress;
+  final MapEntry<Progress, Mission> missionProgress;
   final EdgeInsets margin;
   final VoidCallback? onTap;
 
   const MissionProgressWidget({
     Key? key,
-    required this.progress,
+    required this.missionProgress,
     this.margin = const EdgeInsets.all(16),
     this.onTap,
   }) : super(key: key);
@@ -19,8 +21,8 @@ class MissionProgressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserStore userStore = Modular.get();
-    final bool isRewardCollected = userStore.user!.accessories.contains(progress.missionReward);
-    final bool isMissionCompleted = progress.target == progress.value;
+    final bool isRewardCollected = userStore.user!.accessories.contains(missionProgress.value.reward);
+    final bool isMissionCompleted = missionProgress.key.target == missionProgress.key.value;
 
     return GestureDetector(
       onTap: isMissionCompleted && !isRewardCollected ? onTap : null,
@@ -45,7 +47,7 @@ class MissionProgressWidget extends StatelessWidget {
                     SizedBox.square(
                       dimension: 80,
                       child: Image.asset(
-                        "assets/images/accessories/${progress.missionReward}.png",
+                        "assets/images/accessories/${missionProgress.value.reward}.png",
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -57,7 +59,7 @@ class MissionProgressWidget extends StatelessWidget {
                       ),
                     if (!isMissionCompleted)
                       Text(
-                        "${progress.value}/${progress.target}",
+                        "${missionProgress.key.value}/${missionProgress.key.target}",
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -78,21 +80,16 @@ class MissionProgressWidget extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        progress.missionDescription,
-                        softWrap: true,
-                        maxLines: 10,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                    ],
+                  child: Text(
+                    missionProgress.value.description,
+                    softWrap: true,
+                    maxLines: 10,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Constants.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),

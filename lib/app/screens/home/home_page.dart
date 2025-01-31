@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
       ),
       MenuPageModel(
         name: "Missões",
-        svgIconPath: "assets/images/info.svg",
+        svgIconPath: "assets/images/mission.svg",
         page: MissionPage(),
       ),
       MenuPageModel(

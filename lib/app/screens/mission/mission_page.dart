@@ -8,6 +8,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/progress.dart';
+import '../../util/colors.dart';
+import '../opening/opening_page.dart';
 import 'mission_widget.dart';
 
 
@@ -28,35 +30,30 @@ class _MissionPageState extends State<MissionPage> {
   CityStore cityStore = Modular.get();
 
   bool loading = false;
-  List<Progress> pending = [];
-  List<Progress> completed = [];
+  List<MapEntry<Progress, Mission>> pending = [];
+  List<MapEntry<Progress, Mission>> completed = [];
 
   @override
   void initState() {
-    userService.addMissionsToUser(id: userStore.user!.id, cityId: cityStore.city!.id);
-    getMissionProgressList();
+    if(userStore.user != null) {
+      userService.addMissionsToUser(id: userStore.user!.id, cityId: cityStore.city!.id);
+      getMissionProgressList();
+    }
     super.initState();
   }
 
   getMissionProgressList({String? curatorType}) async {
     setState(() => loading = true);
     List<Mission> missions = await missionService.getMissionsByCity(cityStore.city!.id);
-    if(userStore.user!=null) {
-      Map<String, Progress> userProgress = {for (Progress progress in userStore.user!.progress) progress.missionId: progress};
-      for (Mission mission in missions){
-        if(userProgress.containsKey(mission.id)){
-          Progress? progress = userProgress[mission.id];
-          Progress progressWithDescription = Progress(missionId: progress!.missionId, value: progress!.value, target: progress!.target, missionDescription: mission.description, missionReward: mission.reward);
-          if(progress!.value == progress!.target){
-            completed.add(progressWithDescription);
-          }else{
-            pending.add(progressWithDescription);
-          }
+    Map<String, Progress> userProgress = {for (Progress progress in userStore.user!.progress) progress.missionId: progress};
+    for (Mission mission in missions){
+      if(userProgress.containsKey(mission.id)){
+        Progress? progress = userProgress[mission.id];
+        if(progress!.value == progress!.target){
+          completed.add(MapEntry(progress, mission));
+        }else{
+          pending.add(MapEntry(progress, mission));
         }
-      }
-    } else {
-      for(Mission mission in missions){
-        pending.add(Progress(missionId: mission.id, value: 0, target: mission.target));
       }
     }
     setState(() => loading = false);
@@ -64,76 +61,106 @@ class _MissionPageState extends State<MissionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Missões"),
-        leading: const BackButton(),
-      ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "Missões em andamento",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: pending.length,
-              itemBuilder: (context, index) {
-                Progress progress = pending[index];
-                return MissionProgressWidget(
-                  progress: progress,
-                  margin: EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    bottom: index == pending.length - 1 ? 20 : 10,
+    return userStore.user == null
+        ? Scaffold(
+            appBar: AppBar(
+              leading: Container(),
+              actions: [
+                InkWell(
+                  onTap: () => Modular.to.popAndPushNamed(OpeningPage.routeName),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Login"),
+                      SizedBox(width: 5),
+                      Icon(Icons.login),
+                    ],
                   ),
-                );
-              },
+                )
+              ],
             ),
+            body:Align(
+              alignment: Alignment.topCenter,
+              child: Text(
+                "Faça login para ter acesso a todas as funcionalidades!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Constants.primaryColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+        )
+        :Scaffold(
+          appBar: AppBar(
+            title: const Text("Missões"),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "Missões Concluídas",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: completed.length,
-              itemBuilder: (context, index) {
-                Progress progress = completed[index];
-                return MissionProgressWidget(
-                  progress: progress,
-                  margin: EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    bottom: index == completed.length - 1 ? 20 : 10,
+          body: loading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      "Missões em andamento",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  onTap: () {
-                    if (progress.target == progress.value && !userStore.user!.accessories.contains(progress.missionReward)) {
-                      setState(() async {
-                        User? uptated = await userService.giveReward(id: userStore.user!.id, missionId: progress.missionId);
-                        if(uptated != null) userStore.setUser(uptated);
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Recompensa coletada: ${progress.missionReward}")),
-                      );
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: pending.length,
+                      itemBuilder: (context, index) {
+                        MapEntry<Progress, Mission> missionProgress = pending[index];
+                        return MissionProgressWidget(
+                          missionProgress: missionProgress,
+                          margin: EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            bottom: index == pending.length - 1 ? 20 : 10,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      "Missões Concluídas",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: completed.length,
+                      itemBuilder: (context, index) {
+                        MapEntry<Progress, Mission> missionProgress = completed[index];
+                        return MissionProgressWidget(
+                          missionProgress: missionProgress,
+                          margin: EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            bottom: index == completed.length - 1 ? 20 : 10,
+                          ),
+                          onTap: () {
+                            if (missionProgress.key.target == missionProgress.key.value && !userStore.user!.accessories.contains(missionProgress.value.reward)) {
+                              setState(() async {
+                                User? uptated = await userService.giveReward(id: userStore.user!.id, missionId: missionProgress.key.missionId);
+                                if(uptated != null) userStore.setUser(uptated);
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Recompensa coletada: ${missionProgress.value.reward}")),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+        );
   }
 }
