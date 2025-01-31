@@ -44,11 +44,12 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
   }
 
   CuratorType selected = CuratorType.values.first;
+
   @override
   Widget build(BuildContext context) {
     final curve =
-        CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
-    Animation<int> animation = IntTween(begin: 0, end: 120).animate(curve);
+    CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+    Animation<int> animation = IntTween(begin: 0, end: 80).animate(curve);
 
     List<CuratorType> types = [
       CuratorType.ARTS,
@@ -65,18 +66,20 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: types
           .map(
-            (type) => Expanded(child: type.value == selected.value
-                ? AnimatedBuilder(
-                    animation: animation,
-                    child: buildTypeWidget(type, isSelected: true),
-                    builder: (context, child) => Transform.translate(
+              (type) =>
+              Expanded(child: type.value == selected.value
+                  ? AnimatedBuilder(
+                animation: animation,
+                child: buildTypeWidget(type, isSelected: true),
+                builder: (context, child) =>
+                    Transform.translate(
                       offset: Offset(animation.value.toDouble(), 0),
                       child: child,
                     ),
-                  )
-                : buildTypeWidget(type, isSelected: false),
-            )
-          )
+              )
+                  : buildTypeWidget(type, isSelected: false),
+              )
+      )
           .toList(),
     );
   }
@@ -84,25 +87,52 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
   GestureDetector buildTypeWidget(CuratorType type, {bool isSelected = false}) {
     const double iniWidth = 250;
     const double sizeUp = 1.25;
+    const double offsetX = (iniWidth / 3)*sizeUp;
 
     return GestureDetector(
       onTap: () {
         onSelect(type);
       },
       child: Container(
-          decoration: BoxDecoration(image:
-            DecorationImage(
-              image: Image.asset("assets/images/_${type.toString().split(".").last}.png").image,
-              fit: BoxFit.contain
-            ),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: Image
+                .asset(
+              "assets/images/_${type
+                  .toString()
+                  .split('.')
+                  .last}.png",
+            )
+                .image,
+            fit: BoxFit.contain,
           ),
-          transform: Transform.translate(
-            offset: Offset(isSelected ? -160 : -150, 0),
-          ).transform,
-          width: isSelected ? iniWidth*sizeUp : iniWidth,
-          /*child: Center(
-              child: Text(type.value)),*/
         ),
+        transform: Transform.translate(
+          offset:  Offset(isSelected ? -120 : -150, 0),
+        ).transform,
+        width: isSelected ? iniWidth * sizeUp : iniWidth,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children:[
+              SizedBox(
+                 width: 80,
+                 child: Text(
+                    type.value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Constants.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                 ),
+              ),
+              SizedBox(width: offsetX,)
+            ]
+          ),
+        ),
+      ),
     );
   }
 }
