@@ -87,50 +87,43 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
   GestureDetector buildTypeWidget(CuratorType type, {bool isSelected = false}) {
     const double iniWidth = 250;
     const double sizeUp = 1.25;
-    const double offsetX = (iniWidth / 3)*sizeUp;
+    const double offsetX = (iniWidth / 2.8)*sizeUp;
 
     return GestureDetector(
       onTap: () {
         onSelect(type);
       },
       child: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: Image
-                .asset(
-              "assets/images/_${type
-                  .toString()
-                  .split('.')
-                  .last}.png",
-            )
-                .image,
-            fit: BoxFit.contain,
-          ),
-        ),
         transform: Transform.translate(
           offset:  Offset(isSelected ? -120 : -150, 0),
         ).transform,
         width: isSelected ? iniWidth * sizeUp : iniWidth,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children:[
-              SizedBox(
-                 width: 80,
-                 child: Text(
-                    type.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Constants.primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                 ),
-              ),
-              SizedBox(width: offsetX,)
-            ]
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SvgPicture.asset(
+              "images/_${type.toString().split('.').last}.svg",
+              fit: BoxFit.contain,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children:[
+                SizedBox(
+                   width: 80,
+                   child: Text(
+                      type.value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Constants.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                   ),
+                ),
+                SizedBox(width: offsetX,)
+              ]
+            ),
+          ]
         ),
       ),
     );
