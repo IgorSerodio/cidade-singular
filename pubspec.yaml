@@ -39,16 +39,16 @@ dependencies:
   flutter_mobx: ^2.0.4
   flutter_svg: ^1.0.3
   google_maps_flutter: ^2.1.1
-  dio: ^4.0.4
+  dio: ^5.8.0+1
   shared_preferences: ^2.0.13
-  image_picker: ^0.8.4+9
+  image_picker: ^1.1.2
   flutter_rating_bar: ^4.0.1
   social_share: ^2.3.1
   font_awesome_flutter: ^10.3.0
   percent_indicator: ^4.2.2
-  lottie: ^2.1.0
-  google_maps_flutter_web: ^0.3.2+2
-  geolocator: ^9.0.2
+  lottie: ^3.3.1
+  google_maps_flutter_web: ^0.5.10
+  geolocator: ^13.0.2
   custom_marker: ^1.0.0
 
 dev_dependencies:
@@ -60,7 +60,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.1
+  flutter_lints: ^5.0.0
   mobx_codegen: ^2.0.5+2
   modular_test: ^2.0.0
 

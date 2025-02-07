@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 import 'dart:html';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -12,7 +12,7 @@ class URLImage extends StatelessWidget {
   Widget build(BuildContext context) {
     if(!kIsWeb) return Image.network(url, fit: BoxFit.cover);
     // ignore: undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(
+    ui_web.platformViewRegistry.registerViewFactory(
       url,
           (int _) => ImageElement()..src = url,
     );
