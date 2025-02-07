@@ -11,23 +11,8 @@ class FilterTypeWidget extends StatefulWidget {
   _FilterTypeWidgetState createState() => _FilterTypeWidgetState();
 }
 
-class _FilterTypeWidgetState extends State<FilterTypeWidget>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 1),
-    vsync: this,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _FilterTypeWidgetState extends State<FilterTypeWidget> {
+  CuratorType selected = CuratorType.values.first;
 
   onSelect(CuratorType type) {
     setState(() {
@@ -39,18 +24,10 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
         widget.onChoose.call(selected);
       }
     });
-
-    _controller.forward().then((value) => _controller.reverse());
   }
-
-  CuratorType selected = CuratorType.values.first;
 
   @override
   Widget build(BuildContext context) {
-    final curve =
-    CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
-    Animation<int> animation = IntTween(begin: 0, end: 80).animate(curve);
-
     List<CuratorType> types = [
       CuratorType.ARTS,
       CuratorType.CRAFTS,
@@ -66,19 +43,9 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: types
           .map(
-              (type) =>
-              Expanded(child: type.value == selected.value
-                  ? AnimatedBuilder(
-                animation: animation,
-                child: buildTypeWidget(type, isSelected: true),
-                builder: (context, child) =>
-                    Transform.translate(
-                      offset: Offset(animation.value.toDouble(), 0),
-                      child: child,
-                    ),
-              )
-                  : buildTypeWidget(type, isSelected: false),
-              )
+            (type) => Expanded(
+          child: buildTypeWidget(type, isSelected: type.value == selected.value),
+        ),
       )
           .toList(),
     );
@@ -87,43 +54,43 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
   GestureDetector buildTypeWidget(CuratorType type, {bool isSelected = false}) {
     const double iniWidth = 250;
     const double sizeUp = 1.25;
-    const double offsetX = (iniWidth / 2.8)*sizeUp;
+    const double offsetX = (iniWidth / 2.8) * sizeUp;
 
     return GestureDetector(
       onTap: () {
         onSelect(type);
       },
       child: Container(
-        transform: Transform.translate(
-          offset:  Offset(isSelected ? -120 : -150, 0),
-        ).transform,
         width: isSelected ? iniWidth * sizeUp : iniWidth,
+        transform: Transform.translate(
+          offset: Offset(isSelected ? -120 : -150, 0),
+        ).transform,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Image.asset(
-              "images/_${type.toString().split('.').last}.png",
+            SvgPicture.asset(
+              "images/_${type.toString().split('.').last}.svg",
               fit: BoxFit.contain,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children:[
+              children: [
                 SizedBox(
-                   width: 80,
-                   child: Text(
-                      type.value,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Constants.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                   ),
+                  width: 80,
+                  child: Text(
+                    type.value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Constants.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                SizedBox(width: offsetX,)
-              ]
+                SizedBox(width: offsetX)
+              ],
             ),
-          ]
+          ],
         ),
       ),
     );
