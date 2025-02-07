@@ -8,6 +8,8 @@ class MenuWidget extends StatelessWidget {
   IconData? icon;
   String? svgIconPath;
   bool selected = false;
+  Color unSelectedColor = Colors.white;
+  Color selectedColor = Colors.teal.shade100;
   MenuWidget({
     Key? key,
     required this.onPressed,
@@ -31,14 +33,14 @@ class MenuWidget extends StatelessWidget {
                     icon,
                     size: selected ? 26 : 22,
                     color: selected
-                        ? Constants.primaryColor
-                        : Constants.disableColor,
+                        ? selectedColor
+                        : unSelectedColor,
                   )
                 : SvgPicture.asset(
                     svgIconPath ?? "",
                     color: selected
-                        ? Constants.primaryColor
-                        : Constants.disableColor,
+                        ? selectedColor
+                        : unSelectedColor,
                     width: selected ? 26 : 22,
                     height: selected ? 26 : 22,
                   ),
@@ -46,7 +48,7 @@ class MenuWidget extends StatelessWidget {
               title,
               style: TextStyle(
                 color:
-                    selected ? Constants.primaryColor : Constants.disableColor,
+                    selected ? selectedColor: unSelectedColor,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 12,
               ),

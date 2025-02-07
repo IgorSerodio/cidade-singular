@@ -1,6 +1,7 @@
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';
 import 'package:dio/dio.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class SingularityService {
   DioService dioService;

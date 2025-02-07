@@ -2,10 +2,10 @@ import 'package:cidade_singular/app/screens/home/home_page.dart';
 import 'package:cidade_singular/app/screens/login/login_page.dart';
 import 'package:cidade_singular/app/screens/register/register_page.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
-import 'package:cidade_singular/app/screens/spash/splash_page.dart';
 import 'package:cidade_singular/app/screens/opening/opening_page.dart';
 import 'package:cidade_singular/app/services/city_service.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';
+import 'package:cidade_singular/app/services/mission_service.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/services/review_service.dart';
@@ -23,6 +23,7 @@ class AppModule extends Module {
     Bind((i) => SingularityService(i.get())),
     Bind((i) => CityService(i.get())),
     Bind((i) => UserService(i.get())),
+    Bind((i) => MissionService(i.get())),
     Bind((i) => ReviewService(i.get())),
     Bind((i) => CityStore()),
     Bind((i) => AuthService(i.get())),

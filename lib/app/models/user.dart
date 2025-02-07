@@ -1,15 +1,24 @@
 import 'package:cidade_singular/app/models/city.dart';
+import 'package:cidade_singular/app/models/progress.dart';
 
 class User {
+  static const HEAD = 0;
+  static const TORSO = 1;
+  static const LEGS = 2;
+
   String id;
   String email;
   String name;
   String description;
   UserType type;
-  CuratorType? curator_type;
+  CuratorType? curatorType;
   String picture;
   City? city;
+  List<String> accessories;
+  List<String> equipped;
+  List<Progress> progress;
   int xp;
+
   User({
     required this.id,
     required this.email,
@@ -17,8 +26,11 @@ class User {
     this.city,
     this.description = "",
     this.type = UserType.VISITOR,
-    this.curator_type,
+    this.curatorType,
     this.picture = "",
+    required this.accessories,
+    required this.equipped,
+    required this.progress,
     required this.xp,
   });
 
@@ -30,10 +42,13 @@ class User {
         name = map["name"],
         description = map["description"],
         type = UserType._from[map["type"]],
-        curator_type = map["curator_type"] != null
+        curatorType = map["curator_type"] != null
             ? CuratorType._from[map["curator_type"]]
             : null,
         picture = map["picture"],
+        accessories = List<String>.from(map["accessories"]),
+        equipped = List<String>.from(map["equipped"]),
+        progress = List<Progress>.from(map["progress"]?.map((item) => Progress.fromMap(item)) ?? []),
         xp = map["xp"],
         city = map["city"] == null || (map['city'] is String)
             ? null

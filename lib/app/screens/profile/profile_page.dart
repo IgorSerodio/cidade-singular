@@ -1,11 +1,12 @@
 import 'package:cidade_singular/app/models/user.dart';
-import 'package:cidade_singular/app/screens/login/login_page.dart';
 import 'package:cidade_singular/app/screens/opening/opening_page.dart';
 
 import 'package:cidade_singular/app/services/auth_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
+import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:cidade_singular/app/util/colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -13,14 +14,115 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:percent_indicator/percent_indicator.dart';
 
+enum AccessoryType {
+  head,
+  torso,
+  legs
+}
+
+class _AccessorySelector {
+  final int HEAD = 0;
+  final int TORSO = 1;
+  final int LEGS = 2;
+
+  List<String> headItems = [];
+  List<String> torsoItems = [];
+  List<String> legsItems = [];
+
+  int headIdx = 0;
+  int torsoIdx = 0;
+  int legsIdx = 0;
+
+  final headAccessories = <String> {'cangaceiro_hat'};
+  final torsoAccessories = <String> {'green_dress', 'plaid_shirt'};
+  final legsAccessories = <String> {};
+
+  _AccessorySelector(List<String> items, List<String> equipped) {
+    for(String item in items){
+      if(headAccessories.contains(item)){
+        headItems.add(item);
+      } else if(torsoAccessories.contains(item)){
+        torsoItems.add(item);
+      } else if(legsAccessories.contains(item)){
+        legsItems.add(item);
+      }
+    }
+    headItems.add("none");
+    torsoItems.add("none");
+    legsItems.add("none");
+
+    headIdx = headItems.indexOf(equipped[User.HEAD]!);
+    torsoIdx = torsoItems.indexOf(equipped[User.TORSO]!);
+    legsIdx = legsItems.indexOf(equipped[User.LEGS]!);
+  }
+
+  void _changeIdx(AccessoryType type, int value){
+    switch(type){
+      case AccessoryType.head: {
+        headIdx = (headIdx + value)%headItems.length;
+      }
+      break;
+      case AccessoryType.torso: {
+        torsoIdx = (torsoIdx + value)%torsoItems.length;
+      }
+      break;
+      case AccessoryType.legs: {
+        legsIdx = (legsIdx + value)%legsItems.length;
+      }
+      break;
+    }
+  }
+
+  void next(AccessoryType type){
+    _changeIdx(type, 1);
+  }
+
+  void previous(AccessoryType type){
+    _changeIdx(type, -1);
+  }
+
+  Widget getCurrentItem(AccessoryType type, double height, double width){
+    String item;
+    switch(type){
+      case AccessoryType.head: {
+        item = headItems.elementAt(headIdx);
+      }
+      break;
+      case AccessoryType.torso: {
+        item = torsoItems.elementAt(torsoIdx);
+      }
+      break;
+      case AccessoryType.legs: {
+        item = legsItems.elementAt(legsIdx);
+      }
+      break;
+    }
+
+    if(item=="none") return SizedBox.shrink();
+
+    return SizedBox(
+      height: height,
+      width: width,
+      child: Image.asset("assets/images/accessories/$item.png", fit: BoxFit.cover),
+    );
+  }
+
+  List<String> getEquipped() {
+    return [headItems.elementAt(headIdx), torsoItems.elementAt(torsoIdx), legsItems.elementAt(legsIdx)];
+  }
+}
+
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  _AccessorySelector? accessorySelector;
+
+  ProfilePage({Key? key}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+
   AuthService authService = Modular.get();
 
   UserService userService = Modular.get();
@@ -37,6 +139,8 @@ class _ProfilePageState extends State<ProfilePage> {
   bool loadingPhoto = false;
   bool loadingName = false;
   bool loadingDescription = false;
+
+  final double avatarHeight = 300.0;
 
   logout() async {
     await authService.logout();
@@ -80,6 +184,14 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => loadingName = false);
   }
 
+  void updateEquipped() async {
+    User? updated = await userService.update(
+        id: userStore.user?.id ?? "", equipped: widget.accessorySelector!.getEquipped());
+    if (updated != null) {
+      userStore.setUser(updated);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Observer(builder: (context) {
           User? user = userStore.user;
-
+          if(user!=null) widget.accessorySelector ??= _AccessorySelector(user.accessories, user.equipped);
           return user == null
               ? Align(
                 child: Text(
@@ -125,14 +237,24 @@ class _ProfilePageState extends State<ProfilePage> {
                           ? CircularProgressIndicator()
                           : Stack(
                               children: [
-                                CircleAvatar(
-                                  radius: 60,
-                                  foregroundImage: NetworkImage(user.picture),
-                                  onForegroundImageError: (_, __) {},
-                                  child: Text(
-                                    user.name[0],
-                                    style: TextStyle(fontSize: 38),
-                                  ),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(300),
+                                  child: (user.picture == "")
+                                    ?Container(
+                                      width: 150,
+                                      height: 150,
+                                      color: Colors.blue,
+                                      child: Center(
+                                        child: Text(
+                                          user.name[0],
+                                          style: TextStyle(fontSize: 50),
+                                        ),
+                                      )
+                                    )
+                                    :SizedBox.square(
+                                      dimension: 150,
+                                      child: URLImage(user.picture),
+                                    )
                                 ),
                                 Positioned(
                                   bottom: 0,
@@ -246,9 +368,106 @@ class _ProfilePageState extends State<ProfilePage> {
                         controller: userTypeController
                           ..text = user.type.value +
                               ((user.type == UserType.CURATOR &&
-                                      user.curator_type != null)
-                                  ? " de " + (user.curator_type?.value ?? "")
+                                      user.curatorType != null)
+                                  ? " de ${user.curatorType?.value ?? ""}"
                                   : "")),
+                    SizedBox(height: 20),
+                    Center(
+                      child: Text("Avatar"),
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(height: avatarHeight,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                IconButton(
+                                    iconSize: 20,
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.accessorySelector!.previous(AccessoryType.head);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.arrow_back_ios)
+                                ),
+                                IconButton(
+                                    iconSize: 20,
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.accessorySelector!.previous(AccessoryType.torso);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.arrow_back_ios)
+                                ),
+                                IconButton(
+                                    iconSize: 20,
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.accessorySelector!.previous(AccessoryType.legs);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.arrow_back_ios)
+                                )
+                              ],
+                            ),
+                            Stack(
+                              children: [
+                                SizedBox(
+                                    height: avatarHeight,
+                                    width: avatarHeight*2.0/3.0,
+                                    child: Image.asset("assets/images/avatar.png"),
+                                ),
+                                widget.accessorySelector!.getCurrentItem(AccessoryType.legs, avatarHeight, avatarHeight*2.0/3.0),
+                                widget.accessorySelector!.getCurrentItem(AccessoryType.torso, avatarHeight, avatarHeight*2.0/3.0),
+                                widget.accessorySelector!.getCurrentItem(AccessoryType.head, avatarHeight, avatarHeight*2.0/3.0),
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                IconButton(
+                                    iconSize: 20,
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.accessorySelector!.next(AccessoryType.head);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.arrow_forward_ios)
+                                ),
+                                IconButton(
+                                    iconSize: 20,
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.accessorySelector!.next(AccessoryType.torso);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.arrow_forward_ios)
+                                ),
+                                IconButton(
+                                    iconSize: 20,
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.accessorySelector!.next(AccessoryType.legs);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.arrow_forward_ios)
+                                )
+                              ],
+                            ),
+                          ],
+                      ),
+                    ),
+                    Center(
+                      child: TextButton(
+                        onPressed: () async {
+                          updateEquipped();
+                        },
+                        child: Text("Salvar"),
+                      ),
+                    ),
+                    SizedBox(height: 90)
                   ],
                 );
         }),

@@ -44,11 +44,12 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
   }
 
   CuratorType selected = CuratorType.values.first;
+
   @override
   Widget build(BuildContext context) {
     final curve =
-        CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
-    Animation<int> animation = IntTween(begin: 0, end: 120).animate(curve);
+    CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+    Animation<int> animation = IntTween(begin: 0, end: 80).animate(curve);
 
     List<CuratorType> types = [
       CuratorType.ARTS,
@@ -61,63 +62,68 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
     ];
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: types
           .map(
-            (type) => type.value == selected.value
-                ? AnimatedBuilder(
-                    animation: animation,
-                    child: buildTypeWidget(type, isSelected: true),
-                    builder: (context, child) => Transform.translate(
+              (type) =>
+              Expanded(child: type.value == selected.value
+                  ? AnimatedBuilder(
+                animation: animation,
+                child: buildTypeWidget(type, isSelected: true),
+                builder: (context, child) =>
+                    Transform.translate(
                       offset: Offset(animation.value.toDouble(), 0),
                       child: child,
                     ),
-                  )
-                : buildTypeWidget(type, isSelected: false),
-          )
+              )
+                  : buildTypeWidget(type, isSelected: false),
+              )
+      )
           .toList(),
     );
   }
 
   GestureDetector buildTypeWidget(CuratorType type, {bool isSelected = false}) {
+    const double iniWidth = 250;
+    const double sizeUp = 1.25;
+    const double offsetX = (iniWidth / 2.8)*sizeUp;
+
     return GestureDetector(
       onTap: () {
         onSelect(type);
       },
-      child: Opacity(
-        opacity: isSelected ? 1 : 1,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Constants.getColor(type.toString().split(".").last),
-            borderRadius: BorderRadius.circular(100),
-            boxShadow: [
-              BoxShadow(
-                offset: Offset(2, 2),
-                blurRadius: 5,
-                color: isSelected ? Colors.black45 : Colors.black26,
-              ),
-            ],
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 12 : 10,
-            vertical: isSelected ? 6 : 5,
-          ),
-          transform: Transform.translate(
-            offset: Offset(isSelected ? -120 : -120, 0),
-          ).transform,
-          width: isSelected ? 180 : 160,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(type.value),
-              SizedBox(width: 10),
-              SvgPicture.asset(
-                  "assets/images/${type.toString().split(".").last}.svg",
-                  width: isSelected ? 40 : 20)
-            ],
-          ),
+      child: Container(
+        transform: Transform.translate(
+          offset:  Offset(isSelected ? -120 : -150, 0),
+        ).transform,
+        width: isSelected ? iniWidth * sizeUp : iniWidth,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SvgPicture.asset(
+              "images/_${type.toString().split('.').last}.svg",
+              fit: BoxFit.contain,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children:[
+                SizedBox(
+                   width: 80,
+                   child: Text(
+                      type.value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Constants.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                   ),
+                ),
+                SizedBox(width: offsetX,)
+              ]
+            ),
+          ]
         ),
       ),
     );

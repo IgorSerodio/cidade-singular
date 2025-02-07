@@ -9,6 +9,7 @@ class Singularity {
   String type;
   List<String> photos;
   LatLng latLng;
+  List<String> tags;
 
   Singularity({
     required this.id,
@@ -19,6 +20,7 @@ class Singularity {
     required this.visitingHours,
     required this.photos,
     required this.latLng,
+    required this.tags,
   });
 
   Singularity.fromMap(map)
@@ -29,5 +31,6 @@ class Singularity {
         address = map["address"],
         type = map["type"],
         photos = List<String>.from(map["photos"]),
-        latLng = LatLng(map["lat"], map["lng"]);
+        latLng = LatLng(map["lat"], map["lng"]),
+        tags = List<String>.from(map["tags"]);
 }

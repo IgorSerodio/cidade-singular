@@ -1,3 +1,4 @@
+import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import '../../models/review.dart';
@@ -49,12 +50,21 @@ class ReviewList extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(50),
-                            child: Image.network(
-                              reviews[index].creator.picture,
-                              fit: BoxFit.cover,
-                              height: 35,
+                            child: SizedBox(
                               width: 35,
-                            ),
+                              height: 35,
+                              child: (reviews[index].creator.picture == "")
+                                     ?Container(
+                                        color: Colors.blue,
+                                        child: Center(
+                                          child: Text(
+                                            reviews[index].creator.name[0],
+                                            style: TextStyle(fontSize: 18),
+                                          ),
+                                        )
+                                     )
+                                     :URLImage(reviews[index].creator.picture),
+                            )
                           ),
                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,

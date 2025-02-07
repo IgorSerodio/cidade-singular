@@ -1,18 +1,9 @@
-import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/home/home_page.dart';
 import 'package:cidade_singular/app/screens/login/login_page.dart';
-import 'package:cidade_singular/app/screens/login/recovery_dialog.dart';
-import 'package:cidade_singular/app/screens/register/register_page.dart';
-import 'package:cidade_singular/app/services/auth_service.dart';
-import 'package:cidade_singular/app/services/user_service.dart';
-import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-import '../../services/city_service.dart';
-import '../../stores/city_store.dart';
-import '../city/choose_city_dialog.dart';
 
 class OpeningPage extends StatefulWidget {
   String email;

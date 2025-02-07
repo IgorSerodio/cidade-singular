@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
+import 'package:cidade_singular/app/stores/user_store.dart';
+import 'package:custom_marker/marker_icon.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
+import 'package:cidade_singular/app/util/mission_progress_handler.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
@@ -12,35 +15,66 @@ import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
-import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'dart:ui' as ui;
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
 
   @override
-  _MapPageState createState() => _MapPageState();
+  createState() => _MapPageState();
+}
+
+class _AvatarMarker extends StatelessWidget{
+
+  _AvatarMarker(this.globalKey);
+  final GlobalKey globalKey;
+  final UserStore userStore = Modular.get();
+
+  @override
+  Widget build(BuildContext context) {
+    double avatarHeight = 180.0;
+    return RepaintBoundary(
+      key: globalKey,
+      child: SizedBox(
+        height: avatarHeight,
+        width: avatarHeight*2/3,
+        child: Stack(
+          children: [
+            Image.asset("assets/images/avatar.png", fit: BoxFit.cover,),
+            if (userStore.user != null && userStore.user!.equipped[User.LEGS] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.LEGS]}.png", fit: BoxFit.cover,),
+            if (userStore.user != null && userStore.user!.equipped[User.TORSO] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.TORSO]}.png", fit: BoxFit.cover,),
+            if (userStore.user != null && userStore.user!.equipped[User.HEAD] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.HEAD]}.png", fit: BoxFit.cover,),
+          ],
+        ),
+      )
+    );
+  }
 }
 
 class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
   SingularityService service = Modular.get();
   CityStore cityStore = Modular.get();
+  UserStore userStore = Modular.get();
   bool loading = false;
+  BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  final GlobalKey globalKey = GlobalKey();
 
   @override
   initState() {
     super.initState();
-    getSingularites();
+    getSingularities();
+    Timer.periodic(const Duration(seconds: 1), (Timer _) {
+      if(mounted) updateAvatar();
+    });
   }
 
   Set<Marker> markers = {};
 
   List<Singularity> singularities = [];
 
-  getSingularites({CuratorType? type}) async {
+  getSingularities({CuratorType? type}) async {
     setState(() => loading = true);
     singularities = await service.getSingularities(query: {
       "city": cityStore.city.id,
@@ -53,19 +87,31 @@ class _MapPageState extends State<MapPage> {
         markerId: markerId,
         position: sing.latLng,
         icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
-        infoWindow: InfoWindow(
-          onTap: () async {
-            Modular.to.pushNamed(SingularityPage.routeName, arguments: sing);
-          },
-          title: sing.title,
-          snippet: sing.address,
-        ),
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),);
+          if(userStore.user!=null) MissionProgressHandler.handle(["open_singularity", sing.type] + sing.tags, userStore.user?.id ?? "", cityStore.city?.id ?? "");
+        },
       );
     }).toSet();
+    if(avatar!=null) newMarkers.add(avatar!);
     setState(() {
       markers = newMarkers;
       loading = false;
     });
+  }
+
+  void addCustomIcon() async {
+    BitmapDescriptor temp = await MarkerIcon.widgetToIcon(globalKey);
+    if(temp!=null) markerIcon = temp;
+  }
+
+  Future<Position> getUserCurrentLocation() async {
+    await Geolocator.requestPermission().then((value){
+    }).onError((error, stackTrace) async {
+      await Geolocator.requestPermission();
+      print("ERROR"+error.toString());
+    });
+    return await Geolocator.getCurrentPosition();
   }
 
   changeMapMode() {
@@ -85,8 +131,8 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: GoogleMap(
+          _AvatarMarker(globalKey),
+          GoogleMap(
               myLocationEnabled: false,
               myLocationButtonEnabled: false,
               liteModeEnabled: false,
@@ -102,7 +148,6 @@ class _MapPageState extends State<MapPage> {
                 setState(() {});
               },
               markers: markers,
-            ),
           ),
           if (loading)
             Container(
@@ -114,13 +159,13 @@ class _MapPageState extends State<MapPage> {
               ),
             ),
           Positioned.fill(
+            top: 0,
+            bottom: 86,
             child: FilterTypeWidget(
               onChoose: (type) {
-                getSingularites(type: type);
+                getSingularities(type: type);
               },
             ),
-            top: 100,
-            bottom: 150,
           )
         ],
       ),
@@ -159,33 +204,51 @@ class _MapPageState extends State<MapPage> {
   Future<Map<String, BitmapDescriptor>> loadBitmapIcons() async {
     return {
       "MUSIC": BitmapDescriptor.fromBytes(
-        await getBytesFromAsset("assets/images/music.png", 100)
+        await getBytesFromAsset("assets/images/music.png", 50)
       ),
       "ARTS":  BitmapDescriptor.fromBytes(
-        await getBytesFromAsset("assets/images/art.png", 100)
+        await getBytesFromAsset("assets/images/art.png", 50)
       ),
       "CRAFTS":  BitmapDescriptor.fromBytes(
-        await getBytesFromAsset("assets/images/crafts.png", 100)
+        await getBytesFromAsset("assets/images/crafts.png", 50)
       ),
       "FILM":  BitmapDescriptor.fromBytes(
-        await getBytesFromAsset("assets/images/film.png", 100)
+        await getBytesFromAsset("assets/images/film.png", 50)
       ),
       "GASTRONOMY":  BitmapDescriptor.fromBytes(
-        await getBytesFromAsset("assets/images/gastronomy.png", 100)
+        await getBytesFromAsset("assets/images/gastronomy.png", 50)
       ),
       "LITERATURE":  BitmapDescriptor.fromBytes(
-        await getBytesFromAsset("assets/images/book.png", 100)
+        await getBytesFromAsset("assets/images/book.png", 50)
       ),
       "DESIGN":  BitmapDescriptor.fromBytes(
-        await getBytesFromAsset("assets/images/design.png", 100)
+        await getBytesFromAsset("assets/images/design.png", 50)
       ),
     };
   }
 
-  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+  static Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+  }
+
+  Marker? avatar;
+
+  void updateAvatar() {
+    getUserCurrentLocation().then((value) async {
+      if(markerIcon == BitmapDescriptor.defaultMarker) addCustomIcon();
+      setState(() {
+        avatar = Marker(
+            markerId: const MarkerId("main"),
+            position: LatLng(value.latitude, value.longitude),
+            draggable: false,
+            icon: markerIcon
+        );
+        markers.remove(avatar);
+        markers.add(avatar!);
+      });
+    });
   }
 }

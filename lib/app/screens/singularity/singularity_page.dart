@@ -11,9 +11,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:cidade_singular/app/services/review_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
+import 'package:cidade_singular/app/util/mission_progress_handler.dart';
 
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
+import 'package:cidade_singular/app/stores/city_store.dart';
 
 import '../shared/social_share_bar.dart';
 import '../shared/review_list.dart';
@@ -42,6 +44,7 @@ class _SingularityPageState extends State<SingularityPage> {
   final commentController = TextEditingController();
 
   UserStore userStore = Modular.get();
+  CityStore cityStore = Modular.get();
 
   String coverImg =
       "https://p-cidade-singular.s3.sa-east-1.amazonaws.com/test-imgs/4054014.jpg";
@@ -370,6 +373,7 @@ class _SingularityPageState extends State<SingularityPage> {
                     if (result) {
                       Navigator.of(context).pop(true);
                       await openCongratulationDialogue('Obrigado pela avaliação!', 100);
+                      MissionProgressHandler.handle(["review", widget.singularity.type] + widget.singularity.tags, userStore.user?.id ?? "", cityStore.city?.id ?? "");
                     }
                   },
                 )
