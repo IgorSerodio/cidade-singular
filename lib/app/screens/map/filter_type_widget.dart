@@ -62,9 +62,6 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget> {
       },
       child: Container(
         width: isSelected ? iniWidth * sizeUp : iniWidth,
-        transform: Transform.translate(
-          offset: Offset(isSelected ? -120 : -150, 0),
-        ).transform,
         child: Stack(
           alignment: Alignment.center,
           children: [
