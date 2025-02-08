@@ -10,7 +10,7 @@ class MissionService {
 
   Future<List<Mission>> getMissionsByCity(String cityId) async {
     try {
-      var response = await dioService.dio.get("/missions/city/$cityId");
+      var response = await dioService.dio.get("/mission/city/$cityId");
 
       if (response.data["error"]) {
         return [];
