@@ -65,8 +65,8 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            SvgPicture.asset(
-              "images/_${type.toString().split('.').last}.svg",
+            Image.asset(
+              "images/_${type.toString().split('.').last}.png",
               fit: BoxFit.contain,
             ),
             Row(
