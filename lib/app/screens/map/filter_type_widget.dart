@@ -102,7 +102,7 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
           alignment: Alignment.center,
           children: [
             SvgPicture.asset(
-              "images/_${type.toString().split('.').last}.svg",
+              "assets/images/_${type.toString().split('.').last}.svg",
               fit: BoxFit.contain,
             ),
             Row(
