@@ -36,14 +36,14 @@ class _MissionPageState extends State<MissionPage> {
   @override
   void initState() {
     if(userStore.user != null) {
-      userService.addMissionsToUser(id: userStore.user!.id, cityId: cityStore.city!.id);
       getMissionProgressList();
     }
     super.initState();
   }
 
-  getMissionProgressList({String? curatorType}) async {
+  getMissionProgressList() async {
     setState(() => loading = true);
+    await userService.addMissionsToUser(id: userStore.user!.id, cityId: cityStore.city!.id);
     List<Mission> missions = await missionService.getMissionsByCity(cityStore.city!.id);
     Map<String, Progress> userProgress = {for (Progress progress in userStore.user!.progress) progress.missionId: progress};
     for (Mission mission in missions){
