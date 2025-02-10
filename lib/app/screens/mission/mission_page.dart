@@ -144,17 +144,7 @@ class _MissionPageState extends State<MissionPage> {
                             right: 16,
                             bottom: index == completed.length - 1 ? 20 : 10,
                           ),
-                          onTap: () {
-                            if (missionProgress.key.target == missionProgress.key.value && !userStore.user!.accessories.contains(missionProgress.value.reward)) {
-                              setState(() async {
-                                User? updated = await userService.giveReward(id: userStore.user!.id, missionId: missionProgress.key.missionId);
-                                if(updated != null) userStore.setUser(updated);
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Recompensa coletada: ${missionProgress.value.reward}")),
-                              );
-                            }
-                          },
+                          onTap: () => giveReward(missionProgress.key, missionProgress.value),
                         );
                       },
                     ),
@@ -162,5 +152,16 @@ class _MissionPageState extends State<MissionPage> {
                 ],
               ),
         );
+  }
+  void giveReward(Progress progress, Mission mission) async{
+    User? updated = await userService.giveReward(id: userStore.user!.id, missionId: progress.missionId);
+    if(updated != null) {
+      setState(() {
+        userStore.setUser(updated);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Recompensa coletada: ${mission.reward}")),
+        );
+      });
+    }
   }
 }
