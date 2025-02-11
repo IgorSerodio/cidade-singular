@@ -108,7 +108,7 @@ class UserService {
           if (curator_type != null) "curator_type": curator_type,
           if (accessories != null) "accessories": accessories,
           if (equipped != null) "equipped": equipped,
-          if (progress != null) "equipped": progress,
+          if (progress != null) "progress": progress.map((p) => p.toJson()).toList(),
           if (city != null) "city": city,
           if (xp != null) "xp": xp,
         },

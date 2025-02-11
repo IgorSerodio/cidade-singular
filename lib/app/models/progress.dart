@@ -13,4 +13,12 @@ class Progress {
       : missionId = map["missionId"],
         value = map["value"],
         target = map["target"];
+
+  Map<String, dynamic> toJson() {
+    return {
+      "missionId": missionId,
+      "value": value,
+      "target": target
+    };
+  }
 }

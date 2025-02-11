@@ -19,23 +19,14 @@ class MissionProgressHandler {
       if (user == null){
         throw Exception("Usuário com id $userId não existe");
       }
-
       List<Mission> missionList = missionFilter(await missionService.getMissionsByCity(cityId), tags);
-
       Set<String> missionIds = missionList.map((mission) => mission.id).toSet();
-
-      List<Progress> newProgress = [];
-
       for(Progress missionProgress in user.progress){
-        if(missionIds.contains(missionProgress.missionId) && missionProgress.target<missionProgress.value){
-          newProgress.add(Progress(missionId: missionProgress.missionId, value: (missionProgress.value+1), target: missionProgress.target));
-        }else{
-          newProgress.add(missionProgress);
+        if(missionIds.contains(missionProgress.missionId) && missionProgress.target>missionProgress.value){
+          missionProgress.value += 1;
         }
       }
-
-      User? updated = await userService.update(id: userId, progress: newProgress);
-
+      User? updated = await userService.update(id: userId, progress: user.progress);
       if(updated != null) userStore.setUser(updated);
     } catch (e) {
       print(e);
@@ -44,7 +35,7 @@ class MissionProgressHandler {
 
   static List<Mission> missionFilter(List<Mission> missionList,List<String> tags){
     return missionList.where((mission) {
-      return tags.every((tag) => mission.tags.contains(tag));
+      return mission.tags.every((tag) => tags.contains(tag));
     }).toList();
   }
 }

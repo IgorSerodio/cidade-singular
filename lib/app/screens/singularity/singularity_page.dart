@@ -371,9 +371,9 @@ class _SingularityPageState extends State<SingularityPage> {
                         commentController.text.trim(),
                         ratingReview);
                     if (result) {
+                      MissionProgressHandler.handle(["review", widget.singularity.type] + widget.singularity.tags, userStore.user?.id ?? "", cityStore.city?.id ?? "");
                       Navigator.of(context).pop(true);
                       await openCongratulationDialogue('Obrigado pela avaliação!', 100);
-                      MissionProgressHandler.handle(["review", widget.singularity.type] + widget.singularity.tags, userStore.user?.id ?? "", cityStore.city?.id ?? "");
                     }
                   },
                 )
