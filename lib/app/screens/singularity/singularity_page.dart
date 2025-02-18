@@ -11,7 +11,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:cidade_singular/app/services/review_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
-import 'package:cidade_singular/app/util/mission_progress_handler.dart';
 
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
@@ -371,7 +370,7 @@ class _SingularityPageState extends State<SingularityPage> {
                         commentController.text.trim(),
                         ratingReview);
                     if (result) {
-                      MissionProgressHandler.handle(["review", widget.singularity.type] + widget.singularity.tags, userStore.user?.id ?? "", cityStore.city?.id ?? "");
+                      userService.increaseProgress(id: userStore.user?.id ?? "", cityId: cityStore.city?.id ?? "", tags: ["review", widget.singularity.type] + widget.singularity.tags);
                       Navigator.of(context).pop(true);
                       await openCongratulationDialogue('Obrigado pela avaliação!', 100);
                     }

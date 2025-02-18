@@ -6,8 +6,8 @@ import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:custom_marker/marker_icon.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
+import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
-import 'package:cidade_singular/app/util/mission_progress_handler.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +55,7 @@ class _AvatarMarker extends StatelessWidget{
 class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
   SingularityService service = Modular.get();
+  UserService userService = Modular.get();
   CityStore cityStore = Modular.get();
   UserStore userStore = Modular.get();
   bool loading = false;
@@ -88,7 +89,7 @@ class _MapPageState extends State<MapPage> {
         position: sing.latLng,
         icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
         onTap: () {
-          if(userStore.user!=null) MissionProgressHandler.handle(["open_singularity", sing.type] + sing.tags, userStore.user?.id ?? "", cityStore.city?.id ?? "");
+          if(userStore.user!=null) userService.increaseProgress(id: userStore.user!.id, cityId: cityStore.city!.id, tags: ["open_singularity", sing.type] + sing.tags);
           Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),);
         },
       );

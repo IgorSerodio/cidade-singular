@@ -93,7 +93,6 @@ class UserService {
     String? city,
     List<String>? accessories,
     List<String>? equipped,
-    List<Progress>? progress,
     int? xp,
     required String id,
   }) async {
@@ -108,7 +107,6 @@ class UserService {
           if (curator_type != null) "curator_type": curator_type,
           if (accessories != null) "accessories": accessories,
           if (equipped != null) "equipped": equipped,
-          if (progress != null) "progress": progress.map((p) => p.toJson()).toList(),
           if (city != null) "city": city,
           if (xp != null) "xp": xp,
         },
@@ -186,7 +184,7 @@ class UserService {
   }) async {
     try {
       var response = await dioService.dio.put(
-        "/user/$id/progress/$cityId",
+        "/user/$id/increase-progress/$cityId",
         data: {
           "tags": tags,
         },
