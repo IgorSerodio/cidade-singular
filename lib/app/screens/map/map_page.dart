@@ -89,7 +89,7 @@ class _MapPageState extends State<MapPage> {
         position: sing.latLng,
         icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
         onTap: () {
-          if(userStore.user!=null) userService.increaseProgress(id: userStore.user!.id, cityId: cityStore.city!.id, tags: ["open_singularity", sing.type] + sing.tags, source: sing.id);
+          handleVisit(sing);
           Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),);
         },
       );
@@ -238,7 +238,7 @@ class _MapPageState extends State<MapPage> {
   Marker? avatar;
 
   void updateAvatar() {
-    getUserCurrentLocation().then((value) async {
+    getUserCurrentLocation().then((value) {
       if(markerIcon == BitmapDescriptor.defaultMarker) addCustomIcon();
       setState(() {
         avatar = Marker(
@@ -251,5 +251,27 @@ class _MapPageState extends State<MapPage> {
         markers.add(avatar!);
       });
     });
+  }
+
+  void handleVisit(Singularity sing) async {
+    const minDistance = 50;
+    if(userStore.user!=null){
+      getUserCurrentLocation().then((userPosition) {
+        double distance = Geolocator.distanceBetween(
+          userPosition.latitude,
+          userPosition.longitude,
+          sing.latLng.latitude,
+          sing.latLng.longitude,
+        );
+        if(distance<=minDistance) {
+          userService.increaseProgress(
+              id: userStore.user!.id,
+              cityId: cityStore.city!.id,
+              tags: ["visit", sing.type] + sing.tags,
+              source: sing.id
+          );
+        }
+      });
+    }
   }
 }
