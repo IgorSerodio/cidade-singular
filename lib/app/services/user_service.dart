@@ -5,8 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/progress.dart';
-
 class UserService {
   DioService dioService;
 
@@ -181,12 +179,14 @@ class UserService {
     required String id,
     required String cityId,
     required List<String> tags,
+    required String source,
   }) async {
     try {
       var response = await dioService.dio.put(
         "/user/$id/increase-progress/$cityId",
         data: {
           "tags": tags,
+          "source": source,
         },
       );
 

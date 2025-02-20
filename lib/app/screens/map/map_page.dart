@@ -89,7 +89,7 @@ class _MapPageState extends State<MapPage> {
         position: sing.latLng,
         icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
         onTap: () {
-          if(userStore.user!=null) userService.increaseProgress(id: userStore.user!.id, cityId: cityStore.city!.id, tags: ["open_singularity", sing.type] + sing.tags);
+          if(userStore.user!=null) userService.increaseProgress(id: userStore.user!.id, cityId: cityStore.city!.id, tags: ["open_singularity", sing.type] + sing.tags, source: sing.id);
           Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),);
         },
       );
