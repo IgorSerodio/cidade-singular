@@ -1,5 +1,9 @@
 import 'package:cidade_singular/app/models/city.dart';
 import 'package:cidade_singular/app/models/progress.dart';
+import 'package:cidade_singular/app/models/owned_ticket.dart';
+import 'package:cidade_singular/app/models/singularity.dart';
+
+import 'criative_economy_type.dart';
 
 class User {
   static const HEAD = 0;
@@ -11,11 +15,13 @@ class User {
   String name;
   String description;
   UserType type;
-  CuratorType? curatorType;
+  CriativeEconomyType? curatorType;
   String picture;
   City? city;
   List<String> accessories;
   List<String> equipped;
+  List<String> titles;
+  List<OwnedTicket> tickets;
   List<Progress> progress;
   int xp;
 
@@ -30,29 +36,26 @@ class User {
     this.picture = "",
     required this.accessories,
     required this.equipped,
+    required this.titles,
+    required this.tickets,
     required this.progress,
     required this.xp,
   });
-
-  String get typeV => "";
 
   User.fromMap(Map map)
       : id = map["_id"],
         email = map["email"],
         name = map["name"],
-        description = map["description"],
+        description = map["description"] ?? "",
         type = UserType._from[map["type"]],
-        curatorType = map["curator_type"] != null
-            ? CuratorType._from[map["curator_type"]]
-            : null,
-        picture = map["picture"],
-        accessories = List<String>.from(map["accessories"]),
-        equipped = List<String>.from(map["equipped"]),
+        curatorType = map["curator_type"] != null ? CriativeEconomyType.from[map["curator_type"]] : null,
+        picture = map["picture"] ?? "",
+        accessories = List<String>.from(map["accessories"] ?? []),
+        equipped = List<String>.from(map["equipped"] ?? ["none", "none", "none"]),
+        titles = List<String>.from(map["titles"] ?? []),
+        tickets = List<OwnedTicket>.from(map["tickets"]?.map((item) => OwnedTicket.fromMap(item)) ?? []),
         progress = List<Progress>.from(map["progress"]?.map((item) => Progress.fromMap(item)) ?? []),
-        xp = map["xp"],
-        city = map["city"] == null || (map['city'] is String)
-            ? null
-            : City.fromMap(map["city"]);
+        xp = map["xp"] ?? 0;
 }
 
 enum UserType {
@@ -60,6 +63,7 @@ enum UserType {
   ADMIN,
   MANAGER,
   CURATOR,
+  ENTREPRENEUR,
   VISITOR,
 }
 
@@ -72,6 +76,8 @@ extension UserTypeExtension on UserType {
         return "Ponto focal";
       case UserType.CURATOR:
         return "Curador";
+      case UserType.ENTREPRENEUR:
+        return "Empreendedor";
       case UserType.VISITOR:
         return "Visitante";
       default:
@@ -80,72 +86,21 @@ extension UserTypeExtension on UserType {
   }
 
   operator [](String key) => (name) {
-        switch (name) {
-          case 'ADMIN':
-            return UserType.ADMIN;
-          case 'MANAGER':
-            return UserType.MANAGER;
-          case 'CURATOR':
-            return UserType.CURATOR;
-          case 'VISITOR':
-            return UserType.VISITOR;
-          default:
-            return null;
-        }
-      }(key);
-}
-
-enum CuratorType {
-  _from,
-  ARTS,
-  CRAFTS,
-  FILM,
-  DESIGN,
-  GASTRONOMY,
-  LITERATURE,
-  MUSIC,
-}
-
-extension CuratorTypeExtension on CuratorType {
-  String get value {
-    switch (this) {
-      case CuratorType.ARTS:
-        return "Artes Midiáticas";
-      case CuratorType.CRAFTS:
-        return "Artesanato";
-      case CuratorType.DESIGN:
-        return "Design";
-      case CuratorType.FILM:
-        return "Cinema";
-      case CuratorType.GASTRONOMY:
-        return "Gastronomia";
-      case CuratorType.LITERATURE:
-        return "Literatura";
-      case CuratorType.MUSIC:
-        return "Música";
+    switch (name) {
+      case 'ADMIN':
+        return UserType.ADMIN;
+      case 'MANAGER':
+        return UserType.MANAGER;
+      case 'CURATOR':
+        return UserType.CURATOR;
+      case 'ENTREPRENEUR':
+        return UserType.ENTREPRENEUR;
+      case 'VISITOR':
+        return UserType.VISITOR;
       default:
-        return "Não definido";
+        return null;
     }
-  }
-
-  operator [](String key) => (name) {
-        switch (name) {
-          case 'ARTS':
-            return CuratorType.ARTS;
-          case 'CRAFTS':
-            return CuratorType.CRAFTS;
-          case 'DESIGN':
-            return CuratorType.DESIGN;
-          case 'FILM':
-            return CuratorType.FILM;
-          case 'GASTRONOMY':
-            return CuratorType.GASTRONOMY;
-          case 'LITERATURE':
-            return CuratorType.LITERATURE;
-          case 'MUSIC':
-            return CuratorType.MUSIC;
-          default:
-            return null;
-        }
-      }(key);
+  }(key);
 }
+
+

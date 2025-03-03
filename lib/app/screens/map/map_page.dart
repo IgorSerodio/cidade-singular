@@ -18,6 +18,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:ui' as ui;
 
+import '../../models/criative_economy_type.dart';
+
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
 
@@ -75,7 +77,7 @@ class _MapPageState extends State<MapPage> {
 
   List<Singularity> singularities = [];
 
-  getSingularities({CuratorType? type}) async {
+  getSingularities({CriativeEconomyType? type}) async {
     setState(() => loading = true);
     singularities = await service.getSingularities(query: {
       "city": cityStore.city.id,
@@ -177,7 +179,7 @@ class _MapPageState extends State<MapPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: CuratorType.values
+      children: CriativeEconomyType.values
           .map(
             (type) => GestureDetector(
               onTap: () {},
@@ -267,7 +269,7 @@ class _MapPageState extends State<MapPage> {
           userService.increaseProgress(
               id: userStore.user!.id,
               cityId: cityStore.city!.id,
-              tags: ["visit", sing.type] + sing.tags,
+              tags: ["visit", sing.type.name] + sing.tags,
               source: sing.id
           );
         }

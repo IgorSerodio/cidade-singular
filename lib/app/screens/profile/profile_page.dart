@@ -1,3 +1,4 @@
+import 'package:cidade_singular/app/models/criative_economy_type.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/opening/opening_page.dart';
 

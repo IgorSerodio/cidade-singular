@@ -373,7 +373,7 @@ class _SingularityPageState extends State<SingularityPage> {
                       userService.increaseProgress(
                           id: userStore.user?.id ?? "",
                           cityId: cityStore.city?.id ?? "",
-                          tags: ["review", widget.singularity.type] + widget.singularity.tags,
+                          tags: ["review", widget.singularity.type.name] + widget.singularity.tags,
                           source: widget.singularity.id
                       );
                       Navigator.of(context).pop(true);
