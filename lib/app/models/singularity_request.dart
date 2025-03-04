@@ -1,5 +1,3 @@
-import 'package:cidade_singular/app/models/singularity.dart';
-
 import 'criative_economy_type.dart';
 
 class SingularityRequest {

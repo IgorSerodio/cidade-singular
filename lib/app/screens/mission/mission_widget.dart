@@ -1,4 +1,5 @@
 import 'package:cidade_singular/app/models/mission.dart';
+import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -21,7 +22,7 @@ class MissionProgressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserStore userStore = Modular.get();
-    final bool isRewardCollected = userStore.user!.accessories.contains(missionProgress.value.reward);
+    final bool isRewardCollected = checkCollected(userStore.user!, missionProgress.value);
     final bool isMissionCompleted = missionProgress.key.target == missionProgress.key.value;
 
     return Container(
@@ -47,7 +48,7 @@ class MissionProgressWidget extends StatelessWidget {
                       SizedBox.square(
                         dimension: 80,
                         child: Image.asset(
-                          "assets/images/accessories/${missionProgress.value.reward}.png",
+                          rewardImagePath(missionProgress.value),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -98,5 +99,25 @@ class MissionProgressWidget extends StatelessWidget {
           ),
         ),
     );
+  }
+
+  String rewardImagePath(Mission mission) {
+    if(mission.rewardType == RewardType.TICKET){
+      return "assets/images/ticket.png";
+    }
+    if(mission.rewardType == RewardType.TITLE){
+      return "assets/images/title.png";
+    }
+    return "assets/images/accessories/${missionProgress.value.reward}.png";
+  }
+
+  bool checkCollected(User user, Mission mission) {
+    if(mission.rewardType == RewardType.TITLE){
+      return user.titles.contains(mission.reward);
+    }
+    if(mission.rewardType == RewardType.TICKET){
+      return user.tickets.any((ticket) => ticket.ticketId == mission.reward);
+    }
+    return user.accessories.contains(mission.reward);
   }
 }
