@@ -2,27 +2,26 @@ class Title {
   String id;
   String name;
   String description;
-  String creator;
+  String singularity;
 
   Title({
     required this.id,
     required this.name,
     this.description = "",
-    required this.creator,
+    required this.singularity,
   });
 
   Title.fromMap(Map<String, dynamic> map)
       : id = map["_id"],
         name = map["name"],
         description = map["description"] ?? "",
-        creator = map["creator"];
+        singularity = map["singularity"];
 
   Map<String, dynamic> toMap() {
     return {
-      "_id": id,
       "name": name,
       "description": description,
-      "creator": creator,
+      "singularity": singularity,
     };
   }
 }

@@ -7,7 +7,6 @@ import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:cidade_singular/app/util/colors.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -281,7 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                     ),
                     SizedBox(height: 20),
-                    getWidgetNivel(user.xp),
+                    if(user.type == UserType.VISITOR)getWidgetNivel(user.xp),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -373,7 +372,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ? " de ${user.curatorType?.value ?? ""}"
                                   : "")),
                     SizedBox(height: 20),
-                    Center(
+                    if(user.type == UserType.VISITOR) Center(
                       child: Text("Avatar"),
                     ),
                     SizedBox(height: 20),
@@ -460,7 +459,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                       ),
                     ),
-                    Center(
+                    if(user.type == UserType.VISITOR) Center(
                       child: TextButton(
                         onPressed: () async {
                           updateEquipped();

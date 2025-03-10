@@ -4,6 +4,7 @@ import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
+import 'package:cidade_singular/app/util/mission_progress_utils.dart';
 import 'package:custom_marker/marker_icon.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
@@ -269,8 +270,8 @@ class _MapPageState extends State<MapPage> {
           userService.increaseProgress(
               id: userStore.user!.id,
               cityId: cityStore.city!.id,
-              tags: ["visit", sing.type.name] + sing.tags,
-              source: sing.id
+              tags: [sing.id, TaskType.VISIT.name, sing.type.name] + sing.tags,
+              source: MissionProgressUtils.formatSource(sing.id),
           );
         }
       });

@@ -255,4 +255,47 @@ class UserService {
       return null;
     }
   }
+
+  Future<bool> giveManually(String email, {String? ticketId, String? titleId}) async {
+    try {
+      final Map<String, String> queryParams = {"email": email};
+
+      if (ticketId != null) queryParams["ticket"] = ticketId;
+      if (titleId != null) queryParams["title"] = titleId;
+
+      var response = await dioService.dio.put(
+        "/user/give",
+        queryParameters: queryParams,
+      );
+
+      return !response.data["error"];
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      } else {
+        print(e);
+      }
+      return false;
+    }
+  }
+
+  Future<bool> increaseProgressManually(String email, String missionId) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/increase-progress/$missionId",
+        data: {
+          "email": email,
+        },
+      );
+
+      return !response.data["error"];
+    } catch (e) {
+      if (e is DioError) {
+        print("Erro ao aumentar progresso manualmente: ${e.message}");
+      } else {
+        print("Erro inesperado: $e");
+      }
+      return false;
+    }
+  }
 }

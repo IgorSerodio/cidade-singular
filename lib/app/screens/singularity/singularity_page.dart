@@ -5,6 +5,7 @@ import 'package:cidade_singular/app/models/review.dart';
 import 'package:cidade_singular/app/models/user.dart';
 
 import 'package:cidade_singular/app/util/colors.dart';
+import 'package:cidade_singular/app/util/mission_progress_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -373,8 +374,8 @@ class _SingularityPageState extends State<SingularityPage> {
                       userService.increaseProgress(
                           id: userStore.user?.id ?? "",
                           cityId: cityStore.city?.id ?? "",
-                          tags: ["review", widget.singularity.type.name] + widget.singularity.tags,
-                          source: widget.singularity.id
+                          tags: [widget.singularity.id, TaskType.REVIEW.name, widget.singularity.type.name] + widget.singularity.tags,
+                          source: MissionProgressUtils.formatSource(widget.singularity.id),
                       );
                       Navigator.of(context).pop(true);
                       await openCongratulationDialogue('Obrigado pela avaliação!', 100);

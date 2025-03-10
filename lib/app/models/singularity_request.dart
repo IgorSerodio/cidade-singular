@@ -1,6 +1,7 @@
 import 'criative_economy_type.dart';
 
 class SingularityRequest {
+  String id;
   String visitingHours;
   String title;
   String description;
@@ -9,12 +10,15 @@ class SingularityRequest {
   String creator;
   CriativeEconomyType type;
   List<String> tags;
+  String city;
 
   SingularityRequest({
+    required this.id,
     required this.visitingHours,
     required this.title,
     required this.description,
     required this.address,
+    required this.city,
     required this.creator,
     required this.type,
     this.photos = const [],
@@ -22,11 +26,13 @@ class SingularityRequest {
   });
 
   SingularityRequest.fromMap(Map<String, dynamic> map)
-      : visitingHours = map["visitingHours"],
+      : id = map["_id"],
+        visitingHours = map["visitingHours"],
         title = map["title"],
         description = map["description"],
         address = map["address"],
         photos = List<String>.from(map["photos"] ?? []),
+        city = map["city"],
         creator = map["creator"],
         type = CriativeEconomyType.from[map["type"]],
         tags = List<String>.from(map["tags"] ?? []);

@@ -12,6 +12,8 @@ import '../../util/colors.dart';
 import '../opening/opening_page.dart';
 import 'mission_widget.dart';
 
+enum MissionFilter { ALL, SPONSORED, GENERAL }
+
 class MissionPage extends StatefulWidget {
   const MissionPage({Key? key}) : super(key: key);
 
@@ -29,7 +31,7 @@ class _MissionPageState extends State<MissionPage> {
   List<MapEntry<Progress, Mission>> pending = [];
   List<MapEntry<Progress, Mission>> completed = [];
 
-  String selectedFilter = "all";
+  MissionFilter selectedFilter = MissionFilter.ALL;
 
   @override
   void initState() {
@@ -72,9 +74,9 @@ class _MissionPageState extends State<MissionPage> {
 
   List<MapEntry<Progress, Mission>> filterMissions(
       List<MapEntry<Progress, Mission>> missions) {
-    if (selectedFilter == "sponsored") {
+    if (selectedFilter == MissionFilter.SPONSORED) {
       return missions.where((entry) => entry.value.sponsor != null).toList();
-    } else if (selectedFilter == "general") {
+    } else if (selectedFilter == MissionFilter.GENERAL) {
       return missions.where((entry) => entry.value.sponsor == null).toList();
     }
     return missions;
@@ -117,6 +119,7 @@ class _MissionPageState extends State<MissionPage> {
         : Scaffold(
             appBar: AppBar(
               title: const Text("Missões"),
+              leading: Container(),
             ),
             body: loading
                 ? const Center(child: CircularProgressIndicator())
@@ -194,15 +197,15 @@ class _MissionPageState extends State<MissionPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _filterButton("Todas", "all"),
-          _filterButton("Patrocinadas", "sponsored"),
-          _filterButton("Gerais", "general"),
+          _filterButton("Todas", MissionFilter.ALL),
+          _filterButton("Patrocinadas", MissionFilter.SPONSORED),
+          _filterButton("Gerais", MissionFilter.GENERAL),
         ],
       ),
     );
   }
 
-  Widget _filterButton(String text, String filter) {
+  Widget _filterButton(String text, MissionFilter filter) {
     return ElevatedButton(
       onPressed: () {
         setState(() {
