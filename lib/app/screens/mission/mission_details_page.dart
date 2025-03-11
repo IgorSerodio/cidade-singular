@@ -385,9 +385,11 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _increaseProgressManually,
-                    child: Text("Aumentar Progresso Manualmente"),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _increaseProgressManually,
+                      child: Text("Aumentar Progresso Manualmente"),
+                    ),
                   ),
                 ],
                 const SizedBox(
