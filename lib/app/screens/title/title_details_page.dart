@@ -14,13 +14,16 @@ class TitleDetailsPage extends StatefulWidget {
   final bool isEditing;
 
   const TitleDetailsPage({Key? key, this.title})
-      : isEditing = title != null, super(key: key);
+      : isEditing = title != null,
+        super(key: key);
 
   @override
   _TitleDetailsPageState createState() => _TitleDetailsPageState();
 }
 
 class _TitleDetailsPageState extends State<TitleDetailsPage> {
+  final _formKey = GlobalKey<FormState>();
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -49,24 +52,23 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
   }
 
   void _loadSingularities() async {
-    List<Singularity> singularities =
-    await singularityService.getByCreator(userStore.user!.id);
+    List<Singularity> singularities = await singularityService.getSingularities(query: {
+      "creator": userStore.user!.id
+    });
     setState(() {
       _singularities = singularities;
     });
   }
 
   void _saveChanges() async {
-    if (_nameController.text.isEmpty || _selectedSingularityId == null) {
-      _showSnackBar("Preencha todos os campos obrigatórios!");
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     model.Title updatedTitle = model.Title(
       id: widget.title?.id ?? "",
       name: _nameController.text,
       description: _descriptionController.text,
       singularity: _selectedSingularityId!,
+      creator: userStore.user!.id,
     );
 
     bool success = widget.isEditing
@@ -97,10 +99,7 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
   }
 
   void _giveTitleToUser() async {
-    if (_emailController.text.isEmpty || widget.title == null) {
-      _showSnackBar("Informe o e-mail do usuário!");
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     bool success =
     await userService.giveManually(_emailController.text, titleId: widget.title!.id);
@@ -124,99 +123,109 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Títulos podem ser dados como recompensas de missão ou manualmente e fornecem benefícios ou permissões permanentes.",
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nameController,
-                    decoration: InputDecoration(labelText: "Nome"),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Títulos podem ser dados como recompensas de missão ou manualmente e fornecem benefícios ou permissões permanentes.",
+                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: "Nome",
+                  suffixIcon: ToolTipWidget(
+                    message: "Nome do título. Será exibido na descrição de missões.",
                   ),
+                  border: OutlineInputBorder(),
                 ),
-                ToolTipWidget(message: "Nome do título. Será exibido na descrição de missões."),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(labelText: "Descrição"),
-                    maxLines: 3,
+                validator: (value) =>
+                value!.isEmpty ? "Campo obrigatório" : null,
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: InputDecoration(
+                  labelText: "Descrição",
+                  suffixIcon: ToolTipWidget(
+                    message: "Permissões, benefícios e outras características do título.",
                   ),
+                  border: OutlineInputBorder(),
                 ),
-                ToolTipWidget(message: "Permissões, benefícios e outras características do título."),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(labelText: "Singularidade"),
-                    value: _selectedSingularityId,
-                    items: _singularities.map((singularity) {
-                      return DropdownMenuItem(
-                          value: singularity.id, child: Text(singularity.title));
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedSingularityId = value;
-                      });
-                    },
+                maxLines: 3,
+              ),
+              SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: "Singularidade",
+                  suffixIcon: ToolTipWidget(
+                    message: "A singularidade relacionada ao título.",
                   ),
+                  border: OutlineInputBorder(),
                 ),
-                ToolTipWidget(message: "A singularidade relacionada ao título."),
-              ],
-            ),
-            if (widget.isEditing) ...[
+                value: _selectedSingularityId,
+                items: _singularities.map((singularity) {
+                  return DropdownMenuItem(
+                      value: singularity.id, child: Text(singularity.title));
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedSingularityId = value;
+                  });
+                },
+                validator: (value) =>
+                value == null ? "Selecione uma singularidade" : null,
+              ),
               SizedBox(height: 20),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _emailController,
-                      decoration:
-                      InputDecoration(labelText: "Enviar título para usuário"),
-                    ),
+                  ElevatedButton(
+                    onPressed: _saveChanges,
+                    child: Text(widget.isEditing ? "Salvar mudanças" : "Criar"),
                   ),
-                  ToolTipWidget(message: "Digite o e-mail do usuário que receberá o título."),
+                  if (widget.isEditing)
+                    ElevatedButton(
+                      onPressed: _deleteTitle,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      child: Text("Deletar"),
+                    ),
                 ],
               ),
-              SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _giveTitleToUser,
-                  child: Text("Dar Título para Usuário"),
-                ),
-              ),
-            ],
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: _saveChanges,
-                  child: Text(widget.isEditing ? "Salvar mudanças" : "Criar"),
-                ),
-                if (widget.isEditing)
-                  ElevatedButton(
-                    onPressed: _deleteTitle,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: Text("Deletar"),
+              if (widget.isEditing) ...[
+                SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    "Ações manuais de título",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                   ),
+                ),
+                SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: "E-mail do usuário",
+                    suffixIcon: ToolTipWidget(
+                      message: "Digite o e-mail do usuário que receberá o título.",
+                    ),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                  value!.isEmpty ? "Informe um e-mail" : null,
+                ),
+                SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _giveTitleToUser,
+                    child: Text("Dar Título para Usuário"),
+                  ),
+                ),
               ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

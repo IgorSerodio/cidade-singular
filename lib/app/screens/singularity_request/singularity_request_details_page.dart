@@ -1,3 +1,4 @@
+import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:cidade_singular/app/models/singularity_request.dart';
@@ -5,6 +6,7 @@ import 'package:cidade_singular/app/services/singularity_request_service.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:geocode/geocode.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -46,38 +48,50 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
 
   Future<void> _approveRequest() async {
     try {
-      List<Location> locations = await locationFromAddress(widget.request.address);
-      if (locations.isNotEmpty) {
-        bool success = await singularityService.create(
-          title: widget.request.title,
-          visitingHours: widget.request.visitingHours,
-          address: widget.request.address,
-          type: widget.request.type,
-          description: widget.request.description,
-          creator: widget.request.creator,
-          city: widget.request.city,
-          location: LatLng(locations.first.latitude, locations.first.longitude),
+      GeoCode geoCode = GeoCode();
+      Coordinates location = await geoCode.forwardGeocoding(
+          address: widget.request.address
+      );
+      bool success = false;
+      print(widget.request.toMap().toString());
+      print(location.toString());
+      if (location.latitude!=null && location.longitude != null) {
+         success = await singularityService.create(
+             Singularity(
+               id: '',
+               title: widget.request.title,
+               visitingHours: widget.request.visitingHours,
+               address: widget.request.address,
+               type: widget.request.type,
+               description: widget.request.description,
+               creator: widget.request.creator,
+               city: widget.request.city,
+               latLng: LatLng(location.latitude!, location.longitude!),
+               photos: widget.request.photos,
+               tags: widget.request.tags,
+         )
         );
-
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Singularidade aprovada com sucesso!")),
-          );
-          userService.update(
-            id: widget.request.creator,
-            type: UserType.ENTREPRENEUR.name,
-          );
-          requestService.delete(widget.request.id);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Erro ao aprovar singularidade.")),
-          );
-        }
       }
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Singularidade aprovada com sucesso!")),
+        );
+        userService.update(
+          id: widget.request.creator,
+          type: UserType.ENTREPRENEUR.name,
+        );
+        requestService.delete(widget.request.id);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erro ao aprovar singularidade.${location.latitude == null? " Endereço não encontrado, tente novamente.": ""}"),)
+        );
+      }
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erro ao aprovar singularidade.")),
-      );
+        SnackBar(content: Text("Erro ao aprovar singularidade: $e")),
+     );
     }
   }
 
@@ -101,7 +115,7 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
     widget.request.address = addressController.text;
     widget.request.description = descriptionController.text;
 
-    bool success = await requestService.update(widget.request.id, widget.request);
+    bool success = await requestService.update(widget.request);
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Requisição atualizada com sucesso!")),

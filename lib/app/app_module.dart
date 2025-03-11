@@ -8,6 +8,8 @@ import 'package:cidade_singular/app/services/dio_service.dart';
 import 'package:cidade_singular/app/services/mission_service.dart';
 import 'package:cidade_singular/app/services/singularity_request_service.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
+import 'package:cidade_singular/app/services/ticket_service.dart';
+import 'package:cidade_singular/app/services/title_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/services/review_service.dart';
 
@@ -30,6 +32,8 @@ class AppModule extends Module {
     Bind((i) => AuthService(i.get())),
     Bind((i) => UserStore()),
     Bind((i) => SingularityRequestService(i.get())),
+    Bind((i) => TitleService(i.get())),
+    Bind((i) => TicketService(i.get())),
   ];
 
   @override

@@ -49,7 +49,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
       bool success = await requestService.create(request);
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Requisição enviada com sucesso!")),
+          SnackBar(content: Text("Requisição de singularidade enviada com sucesso! Aguarde aprovação")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +101,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          suffixIcon: ToolTipWidget(message: _getTooltipMessage(label)), // Use o novo ToolTipWidget
+          suffixIcon: ToolTipWidget(message: _getTooltipMessage(label)),
           border: OutlineInputBorder(),
         ),
         maxLines: maxLines,
@@ -117,7 +117,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
       child: DropdownButtonFormField<CriativeEconomyType>(
         decoration: InputDecoration(
           labelText: "Tipo",
-          suffixIcon: ToolTipWidget(message: _getTooltipMessage("Tipo")), // Use o novo ToolTipWidget
+          suffixIcon: ToolTipWidget(message: _getTooltipMessage("Tipo")),
           border: OutlineInputBorder(),
         ),
         items: CriativeEconomyType.values.map((type) {

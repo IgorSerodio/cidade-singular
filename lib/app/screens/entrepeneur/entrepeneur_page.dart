@@ -20,6 +20,9 @@ import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
+import '../../services/auth_service.dart';
+import '../opening/opening_page.dart';
+
 class EntrepreneurPage extends StatefulWidget {
   const EntrepreneurPage({Key? key}) : super(key: key);
 
@@ -34,8 +37,10 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
   final TicketService ticketService = Modular.get();
   final MissionService missionService = Modular.get();
   final SingularityRequestService singularityRequestService = Modular.get();
+  final AuthService authService = Modular.get();
 
   int _selectedTab = 0;
+  bool _isLoading = false;
 
   List<Singularity> _singularities = [];
   List<model.Title> _titles = [];
@@ -46,57 +51,73 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadDataForTab(_selectedTab);
   }
 
-  void _loadData() async {
+  void _loadDataForTab(int index) async {
+    setState(() => _isLoading = true);
+
     final userId = userStore.user!.id;
+    switch (index) {
+      case 0:
+        _singularities = await singularityService
+            .getSingularities(query: {"creator": userId});
+        break;
+      case 1:
+        _titles = await titleService.getByCreator(userId);
+        break;
+      case 2:
+        _requests = await singularityRequestService.getByCreator(userId);
+        break;
+      case 3:
+        _tickets = await ticketService.getByCreator(userId);
+        break;
+      case 4:
+        _missions = await missionService.getBySponsor(userId);
+        break;
+    }
 
-    final singularities = await singularityService.getByCreator(userId);
-    final titles = await titleService.getByCreator(userId);
-    final requests = await singularityRequestService.getByCreator(userId);
-    final tickets = await ticketService.getByCreator(userId);
-    final missions = await missionService.getBySponsor(userId);
-
-    setState(() {
-      _singularities = singularities;
-      _titles = titles;
-      _requests = requests;
-      _tickets = tickets;
-      _missions = missions;
-    });
+    setState(() => _isLoading = false);
   }
 
   void _navigateToDetails(dynamic item) {
     if (item is Singularity) {
-      Modular.to.push(MaterialPageRoute(builder: (_) => SingularityPage(singularity: item)));
+      Modular.to.push(MaterialPageRoute(
+          builder: (_) => SingularityPage(singularity: item)));
     } else if (item is model.Title) {
-      Modular.to.push(MaterialPageRoute(builder: (_) => TitleDetailsPage(title: item)));
+      Modular.to.push(
+          MaterialPageRoute(builder: (_) => TitleDetailsPage(title: item)));
     } else if (item is SingularityRequest) {
-      Modular.to.push(MaterialPageRoute(builder: (_) => SingularityRequestDetailsPage(request: item)));
+      Modular.to.push(MaterialPageRoute(
+          builder: (_) => SingularityRequestDetailsPage(request: item)));
     } else if (item is Ticket) {
-      Modular.to.push(MaterialPageRoute(builder: (_) => TicketDetailsPage(ticket: item)));
+      Modular.to.push(
+          MaterialPageRoute(builder: (_) => TicketDetailsPage(ticket: item)));
     } else if (item is Mission) {
-      Modular.to.push(MaterialPageRoute(builder: (_) => MissionDetailsPage(missionToEdit: item)));
+      Modular.to.push(MaterialPageRoute(
+          builder: (_) => MissionDetailsPage(missionToEdit: item)));
     }
   }
 
   void _createNew() {
     switch (_selectedTab) {
       case 0:
-        Modular.to.push(MaterialPageRoute(builder: (_) => SingularityRequestPage()));
+        Modular.to
+            .push(MaterialPageRoute(builder: (_) => SingularityRequestPage()));
         break;
       case 1:
         Modular.to.push(MaterialPageRoute(builder: (_) => TitleDetailsPage()));
         break;
       case 2:
-        Modular.to.push(MaterialPageRoute(builder: (_) => SingularityRequestPage()));
+        Modular.to
+            .push(MaterialPageRoute(builder: (_) => SingularityRequestPage()));
         break;
       case 3:
         Modular.to.push(MaterialPageRoute(builder: (_) => TicketDetailsPage()));
         break;
       case 4:
-        Modular.to.push(MaterialPageRoute(builder: (_) => MissionDetailsPage()));
+        Modular.to
+            .push(MaterialPageRoute(builder: (_) => MissionDetailsPage()));
         break;
     }
   }
@@ -120,18 +141,38 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text("Menu do Empreendedor")),
+      appBar: AppBar(
+        title: Text("Menu do Empreendedor"),
+        actions: [
+          InkWell(
+            onTap: _logout,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Sair"),
+                SizedBox(width: 5),
+                Icon(Icons.logout_outlined),
+              ],
+            ),
+          )
+        ],
+      ),
       body: Column(
         children: [
           _buildTabButtons(tabTitles),
-          Expanded(child: lists[_selectedTab]),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : lists[_selectedTab],
+          ),
+          Center(
+            child: FloatingActionButton(
               onPressed: _createNew,
-              child: Text("Criar Novo"),
+              backgroundColor: Colors.blue,
+              child: Icon(Icons.add),
             ),
           ),
+          SizedBox(height: 90),
         ],
       ),
     );
@@ -150,9 +191,11 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
                 setState(() {
                   _selectedTab = index;
                 });
+                _loadDataForTab(index);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _selectedTab == index ? Colors.blue : Colors.grey,
+                backgroundColor:
+                    _selectedTab == index ? Colors.blue : Colors.grey,
               ),
               child: Text(tabTitles[index]),
             ),
@@ -166,21 +209,40 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
     return items.isEmpty
         ? Center(child: Text(emptyMessage))
         : ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        if(item is Mission) {
-          return MissionProgressWidget(
-              missionProgress: MapEntry(Progress(missionId: "", value: 0, target: item.target, sources: []), item),
-              onTap: () => _navigateToDetails(item)
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              if (item is Mission) {
+                return MissionProgressWidget(
+                  missionProgress: MapEntry(
+                    Progress(
+                        missionId: "",
+                        value: 0,
+                        target: item.target,
+                        sources: []),
+                    item,
+                  ),
+                  onTap: () => _navigateToDetails(item),
+                  ignoreStatus: true,
+                );
+              }
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                child: ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  title: Text(
+                    _getItemTitle(item),
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () => _navigateToDetails(item),
+                ),
+              );
+            },
           );
-        }
-        return ListTile(
-          title: Text(_getItemTitle(item)),
-          onTap: () => _navigateToDetails(item),
-        );
-      },
-    );
   }
 
   String _getItemTitle(dynamic item) {
@@ -190,5 +252,10 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
     if (item is Ticket) return item.name;
     if (item is Mission) return item.description;
     return "Item Desconhecido";
+  }
+
+  _logout() async {
+    await authService.logout();
+    Modular.to.popAndPushNamed(OpeningPage.routeName);
   }
 }

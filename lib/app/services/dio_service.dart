@@ -9,18 +9,27 @@ class DioService {
   Dio addToken(String token) {
     return dio
       ..interceptors.add(
-          InterceptorsWrapper(onRequest: (RequestOptions options, handler) {
-        return handler.next(_requestInterceptor(options, token));
-      }));
+        InterceptorsWrapper(
+          onRequest: (RequestOptions options, handler) {
+            _logRequest(options);
+            return handler.next(_requestInterceptor(options, token));
+          },
+        ),
+      );
   }
 
   RequestOptions _requestInterceptor(RequestOptions options, String token) {
     options.headers.addAll({"Authorization": "Bearer $token"});
-
     return options;
   }
 
-  removeToken() {
+  void removeToken() {
     dio.interceptors.clear();
+  }
+
+  void _logRequest(RequestOptions options) {
+    print("➡️ Enviando requisição: ${options.method} ${options.uri}");
+    print("Headers: ${options.headers}");
+    print("Body: ${options.data}");
   }
 }

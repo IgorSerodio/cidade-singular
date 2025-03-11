@@ -81,11 +81,12 @@ class _HomePageState extends State<HomePage> {
           svgIconPath: "assets/images/icon-person.svg",
           page: ProfilePage(),
         ),
-      MenuPageModel(
-        name: "Conta",
-        svgIconPath: "assets/images/info.svg",
-        page: EntrepreneurPage(),
-      ),
+      if(isEntrepreneur)
+        MenuPageModel(
+          name: "Conta",
+          svgIconPath: "assets/images/info.svg",
+          page: EntrepreneurPage(),
+        ),
     ];
 
     List<Widget> menuItens = [];

@@ -41,4 +41,22 @@ class Singularity {
         latLng = LatLng(map["lat"], map["lng"]),
         creator = map["creator"],
         tags = List<String>.from(map["tags"]);
+
+
+
+  Map<String, dynamic> toMap() {
+    return {
+      "title": title,
+      "visitingHours": visitingHours,
+      "address": address,
+      "city": city,
+      "type": type.name,
+      "description": description,
+      "creator": creator,
+      "lat": latLng.latitude,
+      "lng": latLng.longitude,
+      "photos": photos,
+      "tags": tags,
+    };
+  }
 }

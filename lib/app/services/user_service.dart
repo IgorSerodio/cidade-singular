@@ -258,14 +258,14 @@ class UserService {
 
   Future<bool> giveManually(String email, {String? ticketId, String? titleId}) async {
     try {
-      final Map<String, String> queryParams = {"email": email};
-
-      if (ticketId != null) queryParams["ticket"] = ticketId;
-      if (titleId != null) queryParams["title"] = titleId;
+      String type = "";
+      String rewardId = "";
+      if (ticketId != null){ type = "ticket"; rewardId = ticketId;}
+      if (titleId != null) {type = "title"; rewardId = titleId;}
 
       var response = await dioService.dio.put(
-        "/user/give",
-        queryParameters: queryParams,
+        "/user/give/$rewardId",
+        data: {"email": email, "type": type, "itemId": rewardId},
       );
 
       return !response.data["error"];
@@ -296,6 +296,27 @@ class UserService {
         print("Erro inesperado: $e");
       }
       return false;
+    }
+  }
+
+  Future<String?> redeemTicket(String email, String ticketId) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/redeem-ticket/$ticketId",
+        data: {
+          "email": email,
+        },
+      );
+
+      return response.data["error"]? response.data["message"] : null;
+    } catch (e) {
+      if (e is DioError) {
+        print("Erro ao resgatar ticket: ${e.message}");
+        return e.message;
+      }
+      print("Erro inesperado: $e");
+
+      return "$e";
     }
   }
 }

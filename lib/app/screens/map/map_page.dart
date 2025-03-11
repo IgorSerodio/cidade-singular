@@ -20,6 +20,7 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:ui' as ui;
 
 import '../../models/criative_economy_type.dart';
+import '../singularity_request/singularity_request_page.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -82,7 +83,7 @@ class _MapPageState extends State<MapPage> {
     setState(() => loading = true);
     singularities = await service.getSingularities(query: {
       "city": cityStore.city.id,
-      if (type != null) "type": type.toString().split(".").last,
+      if (type != null) "type": type.name,
     });
     var icons = await loadBitmapIcons();
     Set<Marker> newMarkers = singularities.map((sing) {
@@ -90,7 +91,7 @@ class _MapPageState extends State<MapPage> {
       return Marker(
         markerId: markerId,
         position: sing.latLng,
-        icon: icons[sing.type] ?? BitmapDescriptor.defaultMarker,
+        icon: icons[sing.type.name] ?? BitmapDescriptor.defaultMarker,
         onTap: () {
           handleVisit(sing);
           Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),);
@@ -137,21 +138,21 @@ class _MapPageState extends State<MapPage> {
         children: [
           _AvatarMarker(globalKey),
           GoogleMap(
-              myLocationEnabled: false,
-              myLocationButtonEnabled: false,
-              liteModeEnabled: false,
-              rotateGesturesEnabled: false,
-              mapType: MapType.normal,
-              initialCameraPosition: CameraPosition(
-                target: cityStore.city.latLng,
-                zoom: 13,
-              ),
-              onMapCreated: (GoogleMapController controller) {
-                _controller = controller;
-                changeMapMode();
-                setState(() {});
-              },
-              markers: markers,
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            liteModeEnabled: false,
+            rotateGesturesEnabled: false,
+            mapType: MapType.normal,
+            initialCameraPosition: CameraPosition(
+              target: cityStore.city.latLng,
+              zoom: 13,
+            ),
+            onMapCreated: (GoogleMapController controller) {
+              _controller = controller;
+              changeMapMode();
+              setState(() {});
+            },
+            markers: markers,
           ),
           if (loading)
             Container(
@@ -170,7 +171,29 @@ class _MapPageState extends State<MapPage> {
                 getSingularities(type: type);
               },
             ),
-          )
+          ),
+          if (userStore.user != null && userStore.user!.type == UserType.VISITOR)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Constants.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  Modular.to.push(
+                    MaterialPageRoute(builder: (context) => SingularityRequestPage()));
+                },
+                child: const Text(
+                  "É empreendedor?\n Cadastre sua singularidade!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -186,7 +209,7 @@ class _MapPageState extends State<MapPage> {
               onTap: () {},
               child: Container(
                 decoration: BoxDecoration(
-                    color: Constants.getColor(type.toString().split(".").last),
+                    color: Constants.getColor(type.name),
                     borderRadius: BorderRadius.circular(50)),
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: Row(
@@ -194,7 +217,7 @@ class _MapPageState extends State<MapPage> {
                   children: [
                     Text(type.value),
                     SvgPicture.asset(
-                        "assets/images/${type.toString().split(".").last}.svg",
+                        "assets/images/${type.name}.svg",
                         width: 20)
                   ],
                 ),

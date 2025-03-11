@@ -20,10 +20,10 @@ class SingularityRequestService {
     }
   }
 
-  Future<bool> update(String id, SingularityRequest request) async {
+  Future<bool> update(SingularityRequest request) async {
     try {
       var response = await dioService.dio.put(
-        "/singularity-request/$id",
+        "/singularity-request/${request.id}",
         data: request.toMap(),
       );
       return response.statusCode == 200;

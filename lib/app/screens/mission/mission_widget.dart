@@ -11,12 +11,14 @@ class MissionProgressWidget extends StatelessWidget {
   final MapEntry<Progress, Mission> missionProgress;
   final EdgeInsets margin;
   final VoidCallback? onTap;
+  final bool ignoreStatus;
 
   const MissionProgressWidget({
     Key? key,
     required this.missionProgress,
     this.margin = const EdgeInsets.all(16),
     this.onTap,
+    this.ignoreStatus = false,
   }) : super(key: key);
 
   @override
@@ -41,7 +43,7 @@ class MissionProgressWidget extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(40),
                 child: GestureDetector(
-                  onTap: isMissionCompleted && !isRewardCollected && onTap!= null? ()=> onTap!() : null,
+                  onTap: onTap != null && (ignoreStatus || (isMissionCompleted && !isRewardCollected))? ()=> onTap!() : null,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [

@@ -3,7 +3,7 @@ import 'package:cidade_singular/app/models/title.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';
 
 class TitleService {
-  final DioService dioService;
+  DioService dioService;
 
   TitleService(this.dioService);
 

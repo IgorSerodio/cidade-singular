@@ -26,13 +26,13 @@ class SingularityRequest {
   });
 
   SingularityRequest.fromMap(Map<String, dynamic> map)
-      : id = map["_id"],
-        visitingHours = map["visitingHours"],
-        title = map["title"],
-        description = map["description"],
-        address = map["address"],
+      : id = map["_id"] ?? "",
+        visitingHours = map["visitingHours"] ?? "",
+        title = map["title"] ?? "",
+        description = map["description"] ?? "",
+        address = map["address"] ?? "",
         photos = List<String>.from(map["photos"] ?? []),
-        city = map["city"],
+        city = map["city"] ?? "",
         creator = map["creator"],
         type = CriativeEconomyType.from[map["type"]],
         tags = List<String>.from(map["tags"] ?? []);
@@ -47,6 +47,7 @@ class SingularityRequest {
       "creator": creator,
       "type": type.name,
       "tags": tags,
+      "city": city,
     };
   }
 }
