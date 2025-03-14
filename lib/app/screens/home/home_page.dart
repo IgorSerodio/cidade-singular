@@ -132,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                             )
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: menuItens,
                         ),
                       )
