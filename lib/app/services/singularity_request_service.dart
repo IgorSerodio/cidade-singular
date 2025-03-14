@@ -74,7 +74,7 @@ class SingularityRequestService {
       var response = await dioService.dio.delete(
         "/singularity-request/$id",
       );
-      return response.statusCode == 200;
+      return response.statusCode == 202;
     } catch (e) {
       print(e);
       return false;

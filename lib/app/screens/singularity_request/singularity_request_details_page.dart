@@ -1,5 +1,6 @@
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
+import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:flutter/material.dart';
 import 'package:cidade_singular/app/models/singularity_request.dart';
 import 'package:cidade_singular/app/services/singularity_request_service.dart';
@@ -7,7 +8,6 @@ import 'package:cidade_singular/app/services/singularity_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:geocode/geocode.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../services/user_service.dart';
@@ -53,8 +53,6 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
           address: widget.request.address
       );
       bool success = false;
-      print(widget.request.toMap().toString());
-      print(location.toString());
       if (location.latitude!=null && location.longitude != null) {
          success = await singularityService.create(
              Singularity(
@@ -69,7 +67,8 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
                latLng: LatLng(location.latitude!, location.longitude!),
                photos: widget.request.photos,
                tags: widget.request.tags,
-         )
+             ),
+             fromRequest: true,
         );
       }
 
@@ -127,6 +126,30 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
     }
   }
 
+  Widget _photoListWidget(){
+    return  Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: widget.request.photos.map((photoUrl) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: URLImage(photoUrl),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,6 +159,7 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _photoListWidget(),
             TextField(controller: titleController, enabled: isCreator, decoration: InputDecoration(labelText: "Título")),
             TextField(controller: visitingHoursController, enabled: isCreator, decoration: InputDecoration(labelText: "Horário de Visitação")),
             TextField(controller: addressController, enabled: isCreator, decoration: InputDecoration(labelText: "Endereço")),

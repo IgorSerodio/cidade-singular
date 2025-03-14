@@ -126,7 +126,7 @@ class _MissionPageState extends State<MissionPage> {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 20),
+                      _buildWarningMessage(),
                       _buildFilterButtons(),
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
@@ -186,9 +186,28 @@ class _MissionPageState extends State<MissionPage> {
                           },
                         ),
                       ),
+                      SizedBox(height: 90),
                     ],
                   ),
           );
+  }
+
+  Widget _buildWarningMessage() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.orange, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              "Missões podem ter seu progresso avançado pela mesma singularidade apenas uma vez por dia.",
+              style: TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFilterButtons() {

@@ -63,18 +63,26 @@ class _SingularityRequestListPageState extends State<SingularityRequestListPage>
           ? Center(child: CircularProgressIndicator())
           : requests.isEmpty
           ? Center(child: Text("Nenhuma requisição encontrada."))
-          : ListView.builder(
-        itemCount: requests.length,
-        itemBuilder: (context, index) {
-          final request = requests[index];
-          return Card(
-            margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: ListTile(
-              title: Text(request.title),
-              onTap: () => _navigateToDetails(request),
+          : Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: requests.length,
+              itemBuilder: (context, index) {
+                final request = requests[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: ListTile(
+                    title: Text(request.title),
+                    subtitle: Text(request.address),
+                    onTap: () => _navigateToDetails(request),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          SizedBox(height: 90),
+        ],
       ),
     );
   }

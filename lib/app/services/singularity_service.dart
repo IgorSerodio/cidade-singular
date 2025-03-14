@@ -10,10 +10,11 @@ class SingularityService {
 
   SingularityService(this.dioService);
 
-  Future<bool> create(Singularity singularity) async {
+  Future<bool> create(Singularity singularity, {bool fromRequest = false}) async {
     try {
       var response = await dioService.dio.post(
         "/singularity",
+        queryParameters: {"fromRequest": fromRequest},
         data: singularity.toMap(),
       );
 
