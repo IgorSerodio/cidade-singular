@@ -43,8 +43,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isCurator = userStore.user != null && userStore.user!.type == UserType.CURATOR;
-    bool isEntrepreneur = userStore.user != null && userStore.user!.type == UserType.ENTREPRENEUR;
+    bool isCurator =
+        userStore.user != null && userStore.user!.type == UserType.CURATOR;
+    bool isEntrepreneur =
+        userStore.user != null && userStore.user!.type == UserType.ENTREPRENEUR;
     bool isVisitor = !isCurator && !isEntrepreneur;
 
     List<MenuPageModel> pages = [
@@ -58,13 +60,13 @@ class _HomePageState extends State<HomePage> {
         svgIconPath: "assets/images/places.svg",
         page: MapPage(),
       ),
-      if(isCurator)
+      if (isCurator)
         MenuPageModel(
           name: "Requisições",
           svgIconPath: "assets/images/info.svg",
           page: SingularityRequestListPage(),
         ),
-      if(!isCurator)
+      if (!isCurator)
         MenuPageModel(
           name: "Info",
           svgIconPath: "assets/images/info.svg",
@@ -75,13 +77,13 @@ class _HomePageState extends State<HomePage> {
         svgIconPath: "assets/images/mission.svg",
         page: MissionPage(),
       ),
-      if(!isEntrepreneur)
+      if (!isEntrepreneur)
         MenuPageModel(
           name: "Perfil",
           svgIconPath: "assets/images/icon-person.svg",
           page: ProfilePage(),
         ),
-      if(isEntrepreneur)
+      if (isEntrepreneur)
         MenuPageModel(
           name: "Conta",
           svgIconPath: "assets/images/info.svg",
@@ -111,42 +113,47 @@ class _HomePageState extends State<HomePage> {
               children: pages.map((p) => p.page).toList(),
             ),
             Positioned(
-              bottom: 0,
-              right: 0,
-              left: 0,
-              child: Container(
-                margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                child: Row(
-                  children: [
-                    Image(
-                        image: AssetImage("assets/images/board_edge.png"),
-                        height: 70,
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 70,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage("assets/images/board_mid_sec.png"),
-                              fit: BoxFit.fill,
-                            )
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: menuItens,
-                        ),
-                      )
-                    ),
-                    Transform.flip(
-                      flipX: true,
-                      child: Image(
-                        image: AssetImage("assets/images/board_edge.png"),
-                        height: 70
-                      )
-                    )
-                  ]
+                bottom: 0,
+                right: 0,
+                left: 0,
+                child: Container(
+                    margin:
+                        const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                        child: Stack(
+                            alignment: AlignmentDirectional.center,
+                            children: [
+                                Row(
+                                    children: [
+                                        Image(
+                                          image: AssetImage("assets/images/board_edge.png"),
+                                          height: 70,
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                height: 70,
+                                                decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                        image: AssetImage("assets/images/board_mid_sec.png"),
+                                                        fit: BoxFit.fill,
+                                                    )
+                                                ),
+                                            )
+                                        ),
+                                        Transform.flip(
+                                            flipX: true,
+                                            child: Image(
+                                                image: AssetImage("assets/images/board_edge.png"),
+                                                height: 70
+                                            )
+                                        )
+                                    ]
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: menuItens,
+                                ),
+                    ])
                 )
-              )
             )
           ],
         ),
