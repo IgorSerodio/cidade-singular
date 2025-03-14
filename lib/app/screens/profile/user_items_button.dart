@@ -28,15 +28,15 @@ class UserItemsButton extends StatelessWidget {
           ClipOval(
             child: Image.asset(
               itemType == "TICKET" ? 'assets/images/ticket.png' : 'assets/images/title.png',
-              width: 40,
-              height: 40,
+              width: 32,
+              height: 32,
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Text(
             itemType == "TICKET" ? "Meus Tickets" : "Meus Títulos",
-            style: const TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 16),
           ),
         ],
       ),
