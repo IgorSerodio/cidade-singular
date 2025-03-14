@@ -31,6 +31,7 @@ class _SplashPageState extends State<SplashPage> {
       if (user != null) {
         cityService.getCity().then((city) {
           if (city != null) {
+            city.description = city.description.replaceAll("\\\\", "\\");
             cityStore.setCity.call([city]);
             Modular.to.popAndPushNamed(HomePage.routeName);
           } else {
