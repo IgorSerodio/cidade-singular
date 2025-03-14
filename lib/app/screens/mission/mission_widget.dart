@@ -24,10 +24,16 @@ class MissionProgressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserStore userStore = Modular.get();
-    final bool isRewardCollected = checkCollected(userStore.user!, missionProgress.value);
-    final bool isMissionCompleted = missionProgress.value.target <= missionProgress.key.value;
+    final Mission mission = missionProgress.value;
+    final Progress progress = missionProgress.key;
+    final bool isRewardCollected = checkCollected(userStore.user!, mission);
+    final bool isMissionCompleted = mission.target <= progress.value;
 
-    return Container(
+    return GestureDetector(
+      onTap: onTap != null && (ignoreStatus || (isMissionCompleted && !isRewardCollected))
+          ? () => onTap!()
+          : null,
+      child: Container(
         margin: margin,
         decoration: BoxDecoration(
           color: const Color(0xFFE5E5E5),
@@ -42,42 +48,39 @@ class MissionProgressWidget extends StatelessWidget {
               const SizedBox(width: 15),
               ClipRRect(
                 borderRadius: BorderRadius.circular(40),
-                child: GestureDetector(
-                  onTap: onTap != null && (ignoreStatus || (isMissionCompleted && !isRewardCollected))? ()=> onTap!() : null,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox.square(
-                        dimension: 80,
-                        child: Image.asset(
-                          rewardImagePath(missionProgress.value),
-                          fit: BoxFit.cover,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox.square(
+                      dimension: 80,
+                      child: Image.asset(
+                        rewardImagePath(mission),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    if (isMissionCompleted && !isRewardCollected)
+                      const Icon(
+                        Icons.check,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    if (!isMissionCompleted)
+                      Text(
+                        "${progress.value}/${mission.target}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1, 1),
+                              blurRadius: 2,
+                              color: Colors.black,
+                            ),
+                          ],
                         ),
                       ),
-                      if (isMissionCompleted && !isRewardCollected)
-                        const Icon(
-                          Icons.check,
-                          size: 40,
-                          color: Colors.white,
-                        ),
-                      if (!isMissionCompleted)
-                        Text(
-                          "${missionProgress.key.value}/${missionProgress.value.target}",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(1, 1),
-                                blurRadius: 2,
-                                color: Colors.black,
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(width: 15),
@@ -85,7 +88,7 @@ class MissionProgressWidget extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(5),
                   child: Text(
-                    missionProgress.value.description,
+                    mission.description,
                     softWrap: true,
                     maxLines: 10,
                     overflow: TextOverflow.ellipsis,
@@ -100,24 +103,25 @@ class MissionProgressWidget extends StatelessWidget {
             ],
           ),
         ),
+      ),
     );
   }
 
   String rewardImagePath(Mission mission) {
-    if(mission.rewardType == RewardType.TICKET){
+    if (mission.rewardType == RewardType.TICKET) {
       return "assets/images/ticket.png";
     }
-    if(mission.rewardType == RewardType.TITLE){
+    if (mission.rewardType == RewardType.TITLE) {
       return "assets/images/title.png";
     }
-    return "assets/images/accessories/${missionProgress.value.reward}.png";
+    return "assets/images/accessories/${mission.reward}.png";
   }
 
   bool checkCollected(User user, Mission mission) {
-    if(mission.rewardType == RewardType.TITLE){
+    if (mission.rewardType == RewardType.TITLE) {
       return user.titles.contains(mission.reward);
     }
-    if(mission.rewardType == RewardType.TICKET){
+    if (mission.rewardType == RewardType.TICKET) {
       return user.tickets.any((ticket) => ticket.ticketId == mission.reward);
     }
     return user.accessories.contains(mission.reward);

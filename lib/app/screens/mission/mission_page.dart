@@ -61,7 +61,7 @@ class _MissionPageState extends State<MissionPage> {
     for (Mission mission in missions) {
       if (userProgress.containsKey(mission.id)) {
         Progress progress = userProgress[mission.id]!;
-        if (progress.value == progress.target) {
+        if (progress.value >= mission.target) {
           completed.add(MapEntry(progress, mission));
         } else {
           pending.add(MapEntry(progress, mission));
@@ -180,8 +180,7 @@ class _MissionPageState extends State<MissionPage> {
                                     ? 20
                                     : 10,
                               ),
-                              onTap: () => giveReward(
-                                  missionProgress.key, missionProgress.value),
+                              onTap: () => giveReward(missionProgress.key, missionProgress.value),
                             );
                           },
                         ),
