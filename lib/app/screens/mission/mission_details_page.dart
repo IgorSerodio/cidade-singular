@@ -336,7 +336,6 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
                             "Detalhes adicionais que você queira acrescentar."),
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: TextInputType.number,
                   onChanged: (value) =>
                       setState(() => _extraDescription = value),
                 ),
