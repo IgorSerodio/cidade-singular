@@ -111,7 +111,7 @@ class _CityPageState extends State<CityPage> {
 
                 SizedBox(height: 20),
                 Text(
-                  cityStore.city.description.replaceAll("\\\\", "\\"),
+                  cityStore.city.description.replaceAll(r"\\", r"\"),
                   textAlign: TextAlign.justify,
                   style: TextStyle(
                     color: Colors.black54,

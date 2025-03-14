@@ -52,7 +52,9 @@ class _SingularityRequestListPageState extends State<SingularityRequestListPage>
       MaterialPageRoute(
         builder: (context) => SingularityRequestDetailsPage(request: request),
       ),
-    );
+    ).then((_) => setState(() {
+      _loadRequests();
+    }));
   }
 
   @override

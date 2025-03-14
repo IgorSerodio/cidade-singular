@@ -25,7 +25,7 @@ class MissionProgressWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserStore userStore = Modular.get();
     final bool isRewardCollected = checkCollected(userStore.user!, missionProgress.value);
-    final bool isMissionCompleted = missionProgress.key.target == missionProgress.key.value;
+    final bool isMissionCompleted = missionProgress.value.target <= missionProgress.key.value;
 
     return Container(
         margin: margin,
@@ -62,7 +62,7 @@ class MissionProgressWidget extends StatelessWidget {
                         ),
                       if (!isMissionCompleted)
                         Text(
-                          "${missionProgress.key.value}/${missionProgress.key.target}",
+                          "${missionProgress.key.value}/${missionProgress.value.target}",
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

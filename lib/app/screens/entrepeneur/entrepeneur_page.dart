@@ -83,41 +83,48 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
   void _navigateToDetails(dynamic item) {
     if (item is Singularity) {
       Modular.to.push(MaterialPageRoute(
-          builder: (_) => SingularityPage(singularity: item)));
+          builder: (_) => SingularityPage(singularity: item)))
+          .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
     } else if (item is model.Title) {
       Modular.to.push(
-          MaterialPageRoute(builder: (_) => TitleDetailsPage(title: item)));
+          MaterialPageRoute(builder: (_) => TitleDetailsPage(title: item)))
+          .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
     } else if (item is SingularityRequest) {
       Modular.to.push(MaterialPageRoute(
-          builder: (_) => SingularityRequestDetailsPage(request: item)));
+          builder: (_) => SingularityRequestDetailsPage(request: item)))
+          .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
     } else if (item is Ticket) {
       Modular.to.push(
-          MaterialPageRoute(builder: (_) => TicketDetailsPage(ticket: item)));
+          MaterialPageRoute(builder: (_) => TicketDetailsPage(ticket: item)))
+          .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
     } else if (item is Mission) {
       Modular.to.push(MaterialPageRoute(
-          builder: (_) => MissionDetailsPage(missionToEdit: item)));
+          builder: (_) => MissionDetailsPage(missionToEdit: item)))
+          .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
     }
   }
 
   void _createNew() {
     switch (_selectedTab) {
       case 0:
-        Modular.to
-            .push(MaterialPageRoute(builder: (_) => SingularityRequestPage()));
+        Modular.to.push(MaterialPageRoute(builder: (_) => SingularityRequestPage()))
+            .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
         break;
       case 1:
-        Modular.to.push(MaterialPageRoute(builder: (_) => TitleDetailsPage()));
+        Modular.to.push(MaterialPageRoute(builder: (_) => TitleDetailsPage()))
+            .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
         break;
       case 2:
-        Modular.to
-            .push(MaterialPageRoute(builder: (_) => SingularityRequestPage()));
+        Modular.to.push(MaterialPageRoute(builder: (_) => SingularityRequestPage()))
+            .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
         break;
       case 3:
-        Modular.to.push(MaterialPageRoute(builder: (_) => TicketDetailsPage()));
+        Modular.to.push(MaterialPageRoute(builder: (_) => TicketDetailsPage()))
+            .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
         break;
       case 4:
-        Modular.to
-            .push(MaterialPageRoute(builder: (_) => MissionDetailsPage()));
+        Modular.to.push(MaterialPageRoute(builder: (_) => MissionDetailsPage()))
+            .then((_)=> setState(() {_loadDataForTab(_selectedTab);}));
         break;
     }
   }
