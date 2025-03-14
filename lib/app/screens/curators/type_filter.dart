@@ -2,7 +2,7 @@ import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../models/criative_economy_type.dart';
+import '../../models/creative_economy_type.dart';
 
 class TypeFilter extends StatefulWidget {
   const TypeFilter({Key? key, required this.onSelect}) : super(key: key);
@@ -14,37 +14,37 @@ class TypeFilter extends StatefulWidget {
 }
 
 class _TypeFilterState extends State<TypeFilter> {
-  CriativeEconomyType curatorFilter = CriativeEconomyType.values[0];
+  CreativeEconomyType curatorFilter = CreativeEconomyType.values[0];
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 40,
       child: ListView.builder(
-        itemCount: CriativeEconomyType.values.length,
+        itemCount: CreativeEconomyType.values.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) => GestureDetector(
           onTap: () {
             setState(() {
-              curatorFilter = CriativeEconomyType.values[index];
+              curatorFilter = CreativeEconomyType.values[index];
             });
-            widget.onSelect(curatorFilter != CriativeEconomyType.values[0]
+            widget.onSelect(curatorFilter != CreativeEconomyType.values[0]
                 ? curatorFilter.toString().split(".").last
                 : null);
           },
           child: Opacity(
-            opacity: curatorFilter == CriativeEconomyType.values[index] ? 1 : .6,
+            opacity: curatorFilter == CreativeEconomyType.values[index] ? 1 : .6,
             child: Container(
               decoration: BoxDecoration(
                   color: Constants.getColor(
-                      CriativeEconomyType.values[index].toString().split(".").last),
+                      CreativeEconomyType.values[index].toString().split(".").last),
                   borderRadius: BorderRadius.circular(50)),
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               margin: EdgeInsets.only(
                 left: index == 0 ? 32 : 0,
                 right: 16,
-                top: curatorFilter == CriativeEconomyType.values[index] ? 0 : 5,
-                bottom: curatorFilter == CriativeEconomyType.values[index] ? 0 : 5,
+                top: curatorFilter == CreativeEconomyType.values[index] ? 0 : 5,
+                bottom: curatorFilter == CreativeEconomyType.values[index] ? 0 : 5,
               ),
               child: index == 0
                   ? Center(
@@ -55,9 +55,9 @@ class _TypeFilterState extends State<TypeFilter> {
                   : Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(CriativeEconomyType.values[index].value),
+                        Text(CreativeEconomyType.values[index].value),
                         SvgPicture.asset(
-                            "assets/images/${CriativeEconomyType.values[index].toString().split(".").last}.svg",
+                            "assets/images/${CreativeEconomyType.values[index].toString().split(".").last}.svg",
                             width: 20)
                       ],
                     ),

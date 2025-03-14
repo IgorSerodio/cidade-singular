@@ -1,7 +1,7 @@
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:flutter/material.dart';
 import 'package:cidade_singular/app/models/singularity_request.dart';
-import 'package:cidade_singular/app/models/criative_economy_type.dart';
+import 'package:cidade_singular/app/models/creative_economy_type.dart';
 import 'package:cidade_singular/app/services/singularity_request_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -23,7 +23,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
   String title = "";
   String visitingHours = "";
   String address = "";
-  CriativeEconomyType? type;
+  CreativeEconomyType? type;
   String description = "";
 
   @override
@@ -114,13 +114,13 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
   Widget _buildDropdownField() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: DropdownButtonFormField<CriativeEconomyType>(
+      child: DropdownButtonFormField<CreativeEconomyType>(
         decoration: InputDecoration(
           labelText: "Tipo",
           suffixIcon: ToolTipWidget(message: _getTooltipMessage("Tipo")),
           border: OutlineInputBorder(),
         ),
-        items: CriativeEconomyType.values.map((type) {
+        items: CreativeEconomyType.values.map((type) {
           return DropdownMenuItem(
             value: type,
             child: Text(type.name),

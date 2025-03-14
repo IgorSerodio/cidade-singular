@@ -1,6 +1,7 @@
-import 'package:cidade_singular/app/models/criative_economy_type.dart';
+import 'package:cidade_singular/app/models/creative_economy_type.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/opening/opening_page.dart';
+import 'package:cidade_singular/app/screens/profile/user_items_button.dart';
 
 import 'package:cidade_singular/app/services/auth_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
@@ -372,7 +373,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ? " de ${user.curatorType?.value ?? ""}"
                                   : "")),
                     SizedBox(height: 20),
-                    if(user.type == UserType.VISITOR) Center(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        UserItemsButton(itemType: "TICKET"),
+                        UserItemsButton(itemType: "TITLES"),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Center(
                       child: Text("Avatar"),
                     ),
                     SizedBox(height: 20),
@@ -459,13 +468,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                       ),
                     ),
-                    if(user.type == UserType.VISITOR) Center(
-                      child: TextButton(
+                    Center(
+                      child: ElevatedButton(
                         onPressed: () async {
                           updateEquipped();
                         },
                         child: Text("Salvar"),
-                      ),
+                      )
                     ),
                     SizedBox(height: 90)
                   ],

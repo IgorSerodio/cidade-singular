@@ -74,4 +74,25 @@ class TitleService {
       return false;
     }
   }
+
+  Future<List<Title>> getByUser(String userId) async {
+    try {
+      var response = await dioService.dio.get(
+        "/title/user/$userId",
+      );
+
+      if (response.data["error"] ?? true) {
+        return [];
+      }
+
+      return (response.data["data"] as List)
+          .map((title) => Title.fromMap(title))
+          .toList();
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      }
+      return [];
+    }
+  }
 }

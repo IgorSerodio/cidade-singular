@@ -3,7 +3,7 @@ import 'package:cidade_singular/app/models/progress.dart';
 import 'package:cidade_singular/app/models/owned_ticket.dart';
 import 'package:cidade_singular/app/models/singularity.dart';
 
-import 'criative_economy_type.dart';
+import 'creative_economy_type.dart';
 
 class User {
   static const HEAD = 0;
@@ -15,7 +15,7 @@ class User {
   String name;
   String description;
   UserType type;
-  CriativeEconomyType? curatorType;
+  CreativeEconomyType? curatorType;
   String picture;
   City? city;
   List<String> accessories;
@@ -48,7 +48,7 @@ class User {
         name = map["name"],
         description = map["description"] ?? "",
         type = UserType._from[map["type"]],
-        curatorType = map["curator_type"] != null ? CriativeEconomyType.from[map["curator_type"]] : null,
+        curatorType = map["curator_type"] != null ? CreativeEconomyType.from[map["curator_type"]] : null,
         picture = map["picture"] ?? "",
         accessories = List<String>.from(map["accessories"] ?? []),
         equipped = List<String>.from(map["equipped"] ?? ["none", "none", "none"]),

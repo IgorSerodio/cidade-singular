@@ -3,7 +3,7 @@ import 'package:cidade_singular/app/services/dio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../models/criative_economy_type.dart';
+import '../models/creative_economy_type.dart';
 
 class SingularityService {
   DioService dioService;

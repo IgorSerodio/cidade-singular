@@ -1,4 +1,4 @@
-import 'criative_economy_type.dart';
+import 'creative_economy_type.dart';
 
 class SingularityRequest {
   String id;
@@ -8,7 +8,7 @@ class SingularityRequest {
   String address;
   List<String> photos;
   String creator;
-  CriativeEconomyType type;
+  CreativeEconomyType type;
   List<String> tags;
   String city;
 
@@ -34,7 +34,7 @@ class SingularityRequest {
         photos = List<String>.from(map["photos"] ?? []),
         city = map["city"] ?? "",
         creator = map["creator"],
-        type = CriativeEconomyType.from[map["type"]],
+        type = CreativeEconomyType.from[map["type"]],
         tags = List<String>.from(map["tags"] ?? []);
 
   Map<String, dynamic> toMap() {

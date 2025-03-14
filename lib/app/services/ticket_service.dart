@@ -74,4 +74,25 @@ class TicketService {
       return false;
     }
   }
+
+  Future<List<Ticket>> getByUser(String userId) async {
+    try {
+      var response = await dioService.dio.get(
+        "/ticket/user/$userId",
+      );
+
+      if (response.data["error"] ?? true) {
+        return [];
+      }
+
+      return (response.data["data"] as List)
+          .map((ticket) => Ticket.fromMap(ticket))
+          .toList();
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      }
+      return [];
+    }
+  }
 }

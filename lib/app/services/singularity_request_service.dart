@@ -1,4 +1,4 @@
-import 'package:cidade_singular/app/models/criative_economy_type.dart';
+import 'package:cidade_singular/app/models/creative_economy_type.dart';
 import 'package:cidade_singular/app/models/singularity_request.dart';
 import 'package:cidade_singular/app/services/dio_service.dart';
 
@@ -33,7 +33,7 @@ class SingularityRequestService {
     }
   }
 
-  Future<List<SingularityRequest>> getByType(CriativeEconomyType type) async {
+  Future<List<SingularityRequest>> getByType(CreativeEconomyType type) async {
     try {
       var response = await dioService.dio.get(
         "/singularity-request/filter",
