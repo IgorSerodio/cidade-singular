@@ -255,4 +255,68 @@ class UserService {
       return null;
     }
   }
+
+  Future<bool> giveManually(String email, {String? ticketId, String? titleId}) async {
+    try {
+      String type = "";
+      String rewardId = "";
+      if (ticketId != null){ type = "ticket"; rewardId = ticketId;}
+      if (titleId != null) {type = "title"; rewardId = titleId;}
+
+      var response = await dioService.dio.put(
+        "/user/give/$rewardId",
+        data: {"email": email, "type": type, "itemId": rewardId},
+      );
+
+      return !response.data["error"];
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      } else {
+        print(e);
+      }
+      return false;
+    }
+  }
+
+  Future<bool> increaseProgressManually(String email, String missionId) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/increase-progress/$missionId",
+        data: {
+          "email": email,
+        },
+      );
+
+      return !response.data["error"];
+    } catch (e) {
+      if (e is DioError) {
+        print("Erro ao aumentar progresso manualmente: ${e.message}");
+      } else {
+        print("Erro inesperado: $e");
+      }
+      return false;
+    }
+  }
+
+  Future<String?> redeemTicket(String email, String ticketId) async {
+    try {
+      var response = await dioService.dio.put(
+        "/user/redeem-ticket/$ticketId",
+        data: {
+          "email": email,
+        },
+      );
+
+      return response.data["error"]? response.data["message"] : null;
+    } catch (e) {
+      if (e is DioError) {
+        print("Erro ao resgatar ticket: ${e.message}");
+        return e.message;
+      }
+      print("Erro inesperado: $e");
+
+      return "$e";
+    }
+  }
 }

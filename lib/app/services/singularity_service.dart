@@ -3,10 +3,29 @@ import 'package:cidade_singular/app/services/dio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../models/creative_economy_type.dart';
+
 class SingularityService {
   DioService dioService;
 
   SingularityService(this.dioService);
+
+  Future<bool> create(Singularity singularity, {bool fromRequest = false}) async {
+    try {
+      var response = await dioService.dio.post(
+        "/singularity",
+        queryParameters: {"fromRequest": fromRequest},
+        data: singularity.toMap(),
+      );
+
+      return !(response.data["error"] ?? true);
+    } catch (e) {
+      if (e is DioError) {
+        print(e);
+      }
+      return false;
+    }
+  }
 
   Future<List<Singularity>> getSingularities(
       {Map<String, String> query = const {}}) async {

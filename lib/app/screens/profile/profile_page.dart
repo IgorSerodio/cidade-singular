@@ -1,12 +1,13 @@
+import 'package:cidade_singular/app/models/creative_economy_type.dart';
 import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/screens/opening/opening_page.dart';
+import 'package:cidade_singular/app/screens/profile/user_items_button.dart';
 
 import 'package:cidade_singular/app/services/auth_service.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:cidade_singular/app/util/colors.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -280,7 +281,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                     ),
                     SizedBox(height: 20),
-                    getWidgetNivel(user.xp),
+                    if(user.type == UserType.VISITOR)getWidgetNivel(user.xp),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -372,6 +373,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ? " de ${user.curatorType?.value ?? ""}"
                                   : "")),
                     SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        UserItemsButton(itemType: "TICKET"),
+                        UserItemsButton(itemType: "TITLES"),
+                      ],
+                    ),
+                    SizedBox(height: 20),
                     Center(
                       child: Text("Avatar"),
                     ),
@@ -460,12 +469,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     Center(
-                      child: TextButton(
+                      child: ElevatedButton(
                         onPressed: () async {
                           updateEquipped();
                         },
                         child: Text("Salvar"),
-                      ),
+                      )
                     ),
                     SizedBox(height: 90)
                   ],

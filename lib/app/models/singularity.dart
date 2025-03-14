@@ -1,15 +1,19 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'creative_economy_type.dart';
+
 class Singularity {
   String id;
   String visitingHours;
   String title;
   String description;
   String address;
-  String type;
+  CreativeEconomyType type;
   List<String> photos;
   LatLng latLng;
   List<String> tags;
+  String? creator;
+  String city;
 
   Singularity({
     required this.id,
@@ -19,6 +23,8 @@ class Singularity {
     required this.type,
     required this.visitingHours,
     required this.photos,
+    required this.city,
+    this.creator,
     required this.latLng,
     required this.tags,
   });
@@ -29,8 +35,28 @@ class Singularity {
         title = map["title"],
         description = map["description"],
         address = map["address"],
-        type = map["type"],
+        city = map["city"],
+        type = CreativeEconomyType.from[map["type"]],
         photos = List<String>.from(map["photos"]),
         latLng = LatLng(map["lat"], map["lng"]),
+        creator = map["creator"],
         tags = List<String>.from(map["tags"]);
+
+
+
+  Map<String, dynamic> toMap() {
+    return {
+      "title": title,
+      "visitingHours": visitingHours,
+      "address": address,
+      "city": city,
+      "type": type.name,
+      "description": description,
+      "creator": creator,
+      "lat": latLng.latitude,
+      "lng": latLng.longitude,
+      "photos": photos,
+      "tags": tags,
+    };
+  }
 }

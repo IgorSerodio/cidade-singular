@@ -1,11 +1,12 @@
-import 'package:cidade_singular/app/models/user.dart';
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../models/creative_economy_type.dart';
+
 class FilterTypeWidget extends StatefulWidget {
   const FilterTypeWidget({Key? key, required this.onChoose}) : super(key: key);
-  final void Function(CuratorType?) onChoose;
+  final void Function(CreativeEconomyType?) onChoose;
 
   @override
   _FilterTypeWidgetState createState() => _FilterTypeWidgetState();
@@ -29,10 +30,10 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
     super.dispose();
   }
 
-  onSelect(CuratorType type) {
+  onSelect(CreativeEconomyType type) {
     setState(() {
       if (type.value == selected.value) {
-        selected = CuratorType.values.first;
+        selected = CreativeEconomyType.values.first;
         widget.onChoose.call(null);
       } else {
         selected = type;
@@ -43,7 +44,7 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
     _controller.forward().then((value) => _controller.reverse());
   }
 
-  CuratorType selected = CuratorType.values.first;
+  CreativeEconomyType selected = CreativeEconomyType.values.first;
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +52,14 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
     CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
     Animation<int> animation = IntTween(begin: 0, end: 80).animate(curve);
 
-    List<CuratorType> types = [
-      CuratorType.ARTS,
-      CuratorType.CRAFTS,
-      CuratorType.DESIGN,
-      CuratorType.FILM,
-      CuratorType.GASTRONOMY,
-      CuratorType.LITERATURE,
-      CuratorType.MUSIC
+    List<CreativeEconomyType> types = [
+      CreativeEconomyType.ARTS,
+      CreativeEconomyType.CRAFTS,
+      CreativeEconomyType.DESIGN,
+      CreativeEconomyType.FILM,
+      CreativeEconomyType.GASTRONOMY,
+      CreativeEconomyType.LITERATURE,
+      CreativeEconomyType.MUSIC
     ];
 
     return Column(
@@ -84,7 +85,7 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
     );
   }
 
-  GestureDetector buildTypeWidget(CuratorType type, {bool isSelected = false}) {
+  GestureDetector buildTypeWidget(CreativeEconomyType type, {bool isSelected = false}) {
     const double iniWidth = 250;
     const double sizeUp = 1.25;
     const double offsetX = (iniWidth / 2.8)*sizeUp;
