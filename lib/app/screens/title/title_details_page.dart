@@ -11,11 +11,8 @@ import '../shared/tool_tip_widget.dart';
 
 class TitleDetailsPage extends StatefulWidget {
   final model.Title? title;
-  final bool isEditing;
 
-  const TitleDetailsPage({Key? key, this.title})
-      : isEditing = title != null,
-        super(key: key);
+  const TitleDetailsPage({Key? key, this.title}): super(key: key);
 
   @override
   _TitleDetailsPageState createState() => _TitleDetailsPageState();
@@ -36,11 +33,13 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
   String? _selectedSingularityId;
   List<Singularity> _singularities = [];
 
+  bool get isEditing => widget.title != null;
+
   @override
   void initState() {
     super.initState();
     _loadSingularities();
-    if (widget.isEditing) {
+    if (isEditing) {
       _initializeFields();
     }
   }
@@ -71,12 +70,12 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
       creator: userStore.user!.id,
     );
 
-    bool success = widget.isEditing
+    bool success = isEditing
         ? await titleService.update(updatedTitle)
         : await titleService.create(updatedTitle);
 
     if (success) {
-      _showSnackBar(widget.isEditing
+      _showSnackBar(isEditing
           ? "Título atualizado com sucesso!"
           : "Título criado com sucesso!");
       Modular.to.pop();
@@ -99,7 +98,10 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
   }
 
   void _giveTitleToUser() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_emailController.text.isEmpty) {
+      _showSnackBar("Informe o e-mail do usuário!");
+      return;
+    }
 
     bool success =
     await userService.giveManually(_emailController.text, titleId: widget.title!.id);
@@ -119,7 +121,7 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? "Detalhes do Título" : "Criar Título"),
+        title: Text(isEditing ? "Detalhes do Título" : "Criar Título"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -181,13 +183,13 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
               ),
               SizedBox(height: 20),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
                     onPressed: _saveChanges,
-                    child: Text(widget.isEditing ? "Salvar mudanças" : "Criar"),
+                    child: Text(isEditing ? "Salvar mudanças" : "Criar"),
                   ),
-                  if (widget.isEditing)
+                  if (isEditing)
                     ElevatedButton(
                       onPressed: _deleteTitle,
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -195,7 +197,7 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
                     ),
                 ],
               ),
-              if (widget.isEditing) ...[
+              if (isEditing) ...[
                 SizedBox(height: 20),
                 Center(
                   child: Text(
@@ -213,8 +215,6 @@ class _TitleDetailsPageState extends State<TitleDetailsPage> {
                     ),
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) =>
-                  value!.isEmpty ? "Informe um e-mail" : null,
                 ),
                 SizedBox(height: 20),
                 Center(

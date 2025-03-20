@@ -46,9 +46,9 @@ class _TicketDetailsPageState extends State<TicketDetailsPage> {
   }
 
   void _initializeFields() {
-    _nameController.text = widget.ticket?.name ?? '';
-    _descriptionController.text = widget.ticket?.description ?? '';
-    _selectedSingularityId = widget.ticket?.singularity ?? '';
+    _nameController.text = widget.ticket!.name;
+    _descriptionController.text = widget.ticket!.description;
+    _selectedSingularityId = widget.ticket!.singularity;
   }
 
   void _loadSingularities() async {

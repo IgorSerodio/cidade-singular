@@ -3,9 +3,11 @@
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/review.dart';
 import 'package:cidade_singular/app/models/user.dart';
+import 'package:cidade_singular/app/services/singularity_service.dart';
 
 import 'package:cidade_singular/app/util/colors.dart';
 import 'package:cidade_singular/app/util/mission_progress_utils.dart';
+import 'package:cidade_singular/app/util/singularity_request_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,7 +18,9 @@ import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../shared/add_photo_button.dart';
 import '../shared/social_share_bar.dart';
 import '../shared/review_list.dart';
 import 'package:lottie/lottie.dart';
@@ -38,24 +42,27 @@ class _SingularityPageState extends State<SingularityPage> {
   double rating = 0.0;
   double ratingReview = 0.0;
 
-  ReviewService service = Modular.get();
-  UserService userService = Modular.get();
+  final ReviewService service = Modular.get();
+  final UserService userService = Modular.get();
+  final SingularityService singularityService = Modular.get();
 
   final commentController = TextEditingController();
 
-  UserStore userStore = Modular.get();
-  CityStore cityStore = Modular.get();
+  final UserStore userStore = Modular.get();
+  final CityStore cityStore = Modular.get();
+  String coverImg = "";
 
-  String coverImg =
-      "https://p-cidade-singular.s3.sa-east-1.amazonaws.com/test-imgs/4054014.jpg";
+  final ImagePicker picker = ImagePicker();
+  List<XFile> newPhotos = [];
 
   @override
   void initState() {
     getReviews(widget.singularity);
-
     setState(() {
       if (widget.singularity.photos.isNotEmpty) {
         coverImg = widget.singularity.photos.first;
+      } else if (newPhotos.isNotEmpty) {
+        coverImg = newPhotos.first.path;
       }
     });
     super.initState();
@@ -73,8 +80,22 @@ class _SingularityPageState extends State<SingularityPage> {
     });
   }
 
+  void _pickImage() async {
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        if (newPhotos.length < 5) {
+          newPhotos.add(image);
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool isCreator = userStore.user!.id == widget.singularity.creator;
+    bool isCurator = userStore.user!.type == UserType.CURATOR;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -108,55 +129,162 @@ class _SingularityPageState extends State<SingularityPage> {
               background: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.network(
-                      coverImg,
-                      fit: BoxFit.cover,
-                    ),
+                    child: coverImg != ""
+                        ? Image.network(
+                          coverImg,
+                          fit: BoxFit.cover,
+                        )
+                        : Container(
+                          color: Constants.primaryColor,
+                        ),
                   ),
-                  if (widget.singularity.photos.length > 2)
+                  if (widget.singularity.photos.isNotEmpty || isCreator || isCurator)
                     Positioned(
                       bottom: 8,
                       right: 8,
                       child: Row(
                         children: [
-                          ...widget.singularity.photos
-                              .map((photo) => GestureDetector(
+                          ...widget.singularity.photos.map((photo) => Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  if (coverImg != photo) {
+                                    setState(() {
+                                      coverImg = photo;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.all(8),
+                                  width: coverImg == photo ? 40 : 35,
+                                  height: coverImg == photo ? 40 : 35,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    image: DecorationImage(
+                                      image: NetworkImage(photo),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        offset: Offset(2, 2),
+                                        blurRadius: 2,
+                                        color: Colors.black38,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (isCreator || isCurator)
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
                                     onTap: () {
-                                      if (coverImg != photo) {
-                                        setState(() {
-                                          coverImg = photo;
-                                        });
-                                      }
+                                      setState(() {
+                                        widget.singularity.photos.remove(photo);
+                                        if (coverImg == photo) {
+                                          if(widget.singularity.photos.isNotEmpty) {
+                                            coverImg = widget.singularity.photos.first;
+                                          } else if (newPhotos.isNotEmpty) {
+                                            coverImg = newPhotos.first.path;
+                                          } else {
+                                            coverImg = "";
+                                          }
+                                        }
+                                      });
                                     },
                                     child: Container(
-                                      margin: EdgeInsets.all(8),
-                                      width: coverImg == photo ? 40 : 35,
-                                      height: coverImg == photo ? 40 : 35,
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        image: DecorationImage(
-                                          image: NetworkImage(photo),
-                                          fit: BoxFit.cover,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            offset: Offset(2, 2),
-                                            blurRadius: 2,
-                                            color: Colors.black38,
-                                          ),
-                                        ],
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
                                       ),
+                                      padding: EdgeInsets.all(4),
+                                      child: Icon(Icons.close, color: Colors.white, size: 16),
                                     ),
-                                  ))
-                              .toList(),
+                                  ),
+                                ),
+                            ],
+                          )),
+                          ...newPhotos.map((photo) => Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  if (coverImg != photo.path) {
+                                    setState(() {
+                                      coverImg = photo.path;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.all(8),
+                                  width: coverImg == photo.path ? 40 : 35,
+                                  height: coverImg == photo.path ? 40 : 35,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        offset: Offset(2, 2),
+                                        blurRadius: 2,
+                                        color: Colors.black38,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Image.network(
+                                    photo.path,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              if (isCreator)
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        newPhotos.remove(photo);
+                                        if (coverImg == photo.path) {
+                                          if(widget.singularity.photos.isNotEmpty) {
+                                            coverImg = widget.singularity.photos.first;
+                                          } else if (newPhotos.isNotEmpty) {
+                                            coverImg = newPhotos.first.path;
+                                          } else {
+                                            coverImg = "";
+                                          }
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: EdgeInsets.all(4),
+                                      child: Icon(Icons.close, color: Colors.white, size: 16),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          )),
+                          if (isCreator)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: AddPhotoButton(
+                                onTap: _pickImage,
+                                width: 35,
+                                height: 35,
+                              ),
+                            ),
                         ],
                       ),
-                    )
+                    ),
                 ],
               ),
             ),
           ),
-          SliverList(
+        SliverList(
             delegate: SliverChildListDelegate(
               [
                 SizedBox(
@@ -172,21 +300,50 @@ class _SingularityPageState extends State<SingularityPage> {
                   ),
                 ),
                 SizedBox(height: 5),
-                Text(
-                  widget.singularity.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Constants.primaryColor,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: isCreator || isCurator
+                      ? TextFormField(
+                    initialValue: widget.singularity.title,
+                    onChanged: (value) {
+                      setState(() {
+                        widget.singularity.title = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: "Título",
+                      border: OutlineInputBorder(),
+                    ),
+                  )
+                      : Text(
+                    widget.singularity.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Constants.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  child: isCreator || isCurator
+                      ? TextFormField(
+                    initialValue: widget.singularity.address,
+                    onChanged: (value) {
+                      setState(() {
+                        widget.singularity.address = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: "Endereço",
+                      border: OutlineInputBorder(),
+                    ),
+                  )
+                      : Row(
                     children: [
                       SvgPicture.asset(
                         "assets/images/places.svg",
@@ -213,7 +370,20 @@ class _SingularityPageState extends State<SingularityPage> {
                 SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  child: isCreator || isCurator
+                      ? TextFormField(
+                    initialValue: widget.singularity.visitingHours,
+                    onChanged: (value) {
+                      setState(() {
+                        widget.singularity.visitingHours = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: "Horário de Visita",
+                      border: OutlineInputBorder(),
+                    ),
+                  )
+                      : Row(
                     children: [
                       SvgPicture.asset(
                         "assets/images/hour.svg",
@@ -260,7 +430,20 @@ class _SingularityPageState extends State<SingularityPage> {
                 SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
+                  child: isCreator || isCurator
+                      ? TextFormField(
+                    initialValue: widget.singularity.description,
+                    maxLines: 5,
+                    onChanged: (value) {
+                      setState(() {
+                        widget.singularity.description = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                  )
+                      : Text(
                     widget.singularity.description,
                     softWrap: true,
                     maxLines: 200,
@@ -272,6 +455,34 @@ class _SingularityPageState extends State<SingularityPage> {
                     ),
                   ),
                 ),
+                SizedBox(height: 10),
+                if (isCreator || isCurator)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: ElevatedButton(
+                          onPressed: () async{
+                            await _updateSingularity();
+                            Modular.to.pop();
+                          },
+                          child: Text("Salvar Alterações"),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: ElevatedButton(
+                          onPressed: () async{
+                            await _deleteSingularity();
+                            Modular.to.pop();
+                          },
+                          child: Text("Deletar Singularidade"),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
                 SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -289,22 +500,20 @@ class _SingularityPageState extends State<SingularityPage> {
                 ),
                 SizedBox(height: 10),
                 reviews.isEmpty ? SizedBox():ReviewList(reviews: reviews),
-                SizedBox(height: 10),
-                TextButton.icon(
-                  // <-- TextButton
-                  // onPressed: () {
-                  //   openDialogue();
-                  // },
-                  onPressed: userStore.user == null ? null : ()=>{openDialogue()},
-                  icon: Icon(
-                    Icons.add_circle_outline,
-                    size: 24.0,
+                if(!isCreator)...[
+                  SizedBox(height: 10),
+                  TextButton.icon(
+                    onPressed: userStore.user == null ? null : ()=>{openDialogue()},
+                    icon: Icon(
+                      Icons.add_circle_outline,
+                      size: 24.0,
+                    ),
+                    label: Text('Nova Avaliação'),
                   ),
-                  label: Text('Nova Avaliação'),
-                ),
+                ]
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -383,6 +592,42 @@ class _SingularityPageState extends State<SingularityPage> {
                   },
                 )
               ]));
+
+  Future _updateSingularity() async{
+    List<String> encodedNewPhotos = await SingularityResquestUtils.convertToEncodedList(newPhotos);
+    bool updated = await singularityService.update(widget.singularity, newPhotos: encodedNewPhotos.isNotEmpty? encodedNewPhotos : null);
+    if (updated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Singularidade atualizada com sucesso!"),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erro ao atualizar singularidade!"),
+        ),
+      );
+    }
+  }
+
+  Future _deleteSingularity() async {
+    bool deleted = await singularityService.delete(widget.singularity.id);
+
+    if (deleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Singularidade deletada com sucesso!"),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erro ao deletar singularidade!"),
+        ),
+      );
+    }
+  }
 
   Future openCongratulationDialogue(String text, int points) =>
       showDialog<bool>(

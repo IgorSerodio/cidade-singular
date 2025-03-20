@@ -57,10 +57,12 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
     _loadOwned();
 
     if (widget.missionToEdit != null) {
-      _selectedSingularityId = widget.missionToEdit?.tags.first;
-      _selectedRewardType = widget.missionToEdit?.rewardType;
-      _selectedRewardId = widget.missionToEdit?.reward;
-      _selectedTarget = widget.missionToEdit?.target.toString() ?? '0';
+      _selectedSingularityId = widget.missionToEdit!.tags.first;
+      _selectedRewardType = widget.missionToEdit!.rewardType;
+      _selectedRewardId = widget.missionToEdit!.reward;
+      _selectedTask = MissionProgressUtils.stringToTaskType[widget.missionToEdit!.tags[1]];
+      _selectedTarget = widget.missionToEdit!.target.toString();
+      _targetController.text = _selectedTarget!;
     }
   }
 
@@ -97,7 +99,11 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
         _selectedTask == null ||
         _selectedRewardId == null ||
         _targetController == null ||
-        _selectedRewardType == null) {
+        _selectedRewardType == null ||
+        _singularities.isEmpty ||
+        _selectedRewardType!.name == "TICKET"
+          ? _tickets.isEmpty
+          : _titles.isEmpty) {
       if (widget.missionToEdit != null &&
           widget.missionToEdit!.description != null) {
         return widget.missionToEdit!.description;
@@ -119,7 +125,7 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
     if (_selectedSingularityId == null ||
         _selectedTask == null ||
         _selectedRewardId == null ||
-        _selectedTarget == null) {
+        _selectedTarget == null ) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Preencha todos os campos obrigatórios!")),
       );

@@ -149,6 +149,7 @@ class _EntrepreneurPageState extends State<EntrepreneurPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Container(),
         title: Text("Menu do Empreendedor"),
         actions: [
           InkWell(

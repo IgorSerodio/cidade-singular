@@ -60,7 +60,10 @@ class _SingularityRequestListPageState extends State<SingularityRequestListPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Lista de Requisições de Singularidade")),
+      appBar: AppBar(
+          leading: Container(),
+          title: Text("Lista de Requisições de Singularidade")
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : requests.isEmpty

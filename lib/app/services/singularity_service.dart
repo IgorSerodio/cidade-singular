@@ -27,6 +27,33 @@ class SingularityService {
     }
   }
 
+  Future<bool> update(Singularity singularity, {List<String>? newPhotos}) async {
+    try {
+      Map<String, dynamic> data = singularity.toMap();
+      if(newPhotos!=null)data["newPhotos"] = newPhotos;
+      var response = await dioService.dio.put(
+        "/singularity/${singularity.id}",
+        data: data,
+      );
+      return !response.data["error"];
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<bool> delete(String id) async {
+    try {
+      var response = await dioService.dio.delete(
+        "/singularity/$id",
+      );
+      return !response.data["error"];
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
   Future<List<Singularity>> getSingularities(
       {Map<String, String> query = const {}}) async {
     try {

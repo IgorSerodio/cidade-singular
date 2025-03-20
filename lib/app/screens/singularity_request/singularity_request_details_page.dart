@@ -1,16 +1,18 @@
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
+import 'package:cidade_singular/app/screens/shared/add_photo_button.dart';
+import 'package:cidade_singular/app/util/singularity_request_utils.dart';
 import 'package:cidade_singular/app/util/URLImage.dart';
 import 'package:flutter/material.dart';
 import 'package:cidade_singular/app/models/singularity_request.dart';
 import 'package:cidade_singular/app/services/singularity_request_service.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
+import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:geocode/geocode.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import '../../services/user_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SingularityRequestDetailsPage extends StatefulWidget {
   final SingularityRequest request;
@@ -113,8 +115,8 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
     widget.request.visitingHours = visitingHoursController.text;
     widget.request.address = addressController.text;
     widget.request.description = descriptionController.text;
-
-    bool success = await requestService.update(widget.request);
+    List<String> encodedNewPhotos = await SingularityResquestUtils.convertToEncodedList(newPhotos);
+    bool success = await requestService.update(widget.request, newPhotos: encodedNewPhotos.isNotEmpty? encodedNewPhotos: null);
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Requisição atualizada com sucesso!")),
@@ -126,28 +128,112 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
     }
   }
 
-  Widget _photoListWidget(){
-    return  Padding(
+  final ImagePicker picker = ImagePicker();
+  List<XFile> newPhotos = [];
+
+  Widget _photoListWidget() {
+    return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: widget.request.photos.map((photoUrl) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  height: 100,
-                  width: 100,
-                  child: URLImage(photoUrl),
+          children: [
+            ...widget.request.photos.map((photoUrl) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        height: 100,
+                        width: 100,
+                        child: URLImage(photoUrl),
+                      ),
+                    ),
+                    if (isCreator)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: GestureDetector(
+                          onTap: () => _removePhoto(url: photoUrl),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.red.withOpacity(0.7),
+                            ),
+                            padding: EdgeInsets.all(4),
+                            child: Icon(Icons.close, size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+              );
+            }),
+            ...newPhotos.map((photo) => Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      photo.path,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () => _removePhoto(file: photo),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.red.withOpacity(0.7),
+                        ),
+                        padding: EdgeInsets.all(4),
+                        child: Icon(Icons.close, size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            );
-          }).toList(),
+            )),
+            if (isCreator && newPhotos.length + widget.request.photos.length < 5)
+              AddPhotoButton(onTap: _pickImage)
+          ],
         ),
       ),
     );
+  }
+
+  void _pickImage() async {
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        if (newPhotos.length < 5) {
+          newPhotos.add(image);
+        }
+      });
+    }
+  }
+
+  void _removePhoto({XFile? file, String? url}) {
+    if(file!=null){
+      setState(() {
+        newPhotos.remove(file);
+      });
+    }
+    if(url!=null){
+      setState(() {
+        widget.request.photos.remove(url);
+      });
+    }
   }
 
   @override

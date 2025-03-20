@@ -13,20 +13,22 @@ class SingularityRequestService {
         "/singularity-request",
         data: request.toMap(),
       );
-      return response.statusCode == 201;
+      return !response.data["error"];
     } catch (e) {
       print(e);
       return false;
     }
   }
 
-  Future<bool> update(SingularityRequest request) async {
+  Future<bool> update(SingularityRequest request, {List<String>? newPhotos}) async {
     try {
+      Map<String, dynamic> data = request.toMap();
+      if(newPhotos!=null)data["newPhotos"] = newPhotos;
       var response = await dioService.dio.put(
         "/singularity-request/${request.id}",
-        data: request.toMap(),
+        data: data,
       );
-      return response.statusCode == 200;
+      return !response.data["error"];
     } catch (e) {
       print(e);
       return false;
@@ -74,7 +76,7 @@ class SingularityRequestService {
       var response = await dioService.dio.delete(
         "/singularity-request/$id",
       );
-      return response.statusCode == 202;
+      return !response.data["error"];
     } catch (e) {
       print(e);
       return false;

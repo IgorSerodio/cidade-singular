@@ -1,5 +1,5 @@
-import 'dart:convert';
-
+import 'package:cidade_singular/app/screens/shared/add_photo_button.dart';
+import 'package:cidade_singular/app/util/singularity_request_utils.dart';
 import 'package:cidade_singular/app/stores/city_store.dart';
 import 'package:flutter/material.dart';
 import 'package:cidade_singular/app/models/singularity_request.dart';
@@ -46,7 +46,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
           type: type!,
           description: description,
           creator: userStore.user!.id,
-          photos: await _convertToEncodedList(photos),
+          photos: await SingularityResquestUtils.convertToEncodedList(photos),
           city: cityStore.city!.id);
 
       bool success = await requestService.create(request);
@@ -148,7 +148,6 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
 
   final ImagePicker picker = ImagePicker();
   List<XFile> photos = [];
-  bool loadingPhoto = false;
 
   Widget _buildPhotoUploadField() {
     return Column(
@@ -164,8 +163,11 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
           child: Row(
             children: [
               ...photos.map((photo) => Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ClipRRect(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
                         photo.path,
@@ -174,23 +176,26 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                  )),
-              if (photos.length < 5)
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey[300],
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () => _removePhoto(photo),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.red.withOpacity(0.7),
+                          ),
+                          padding: EdgeInsets.all(4),
+                          child: Icon(Icons.close, size: 16, color: Colors.white),
+                        ),
+                      ),
                     ),
-                    child: loadingPhoto
-                        ? Center(child: CircularProgressIndicator())
-                        : Icon(Icons.add_a_photo,
-                            size: 40, color: Colors.grey[600]),
-                  ),
+                  ],
                 ),
+              )),
+              if (photos.length < 5)
+                AddPhotoButton(onTap: _pickImage)
             ],
           ),
         ),
@@ -198,8 +203,13 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
     );
   }
 
+  void _removePhoto(XFile photo) {
+    setState(() {
+      photos.remove(photo);
+    });
+  }
+
   void _pickImage() async {
-    setState(() => loadingPhoto = true);
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
@@ -208,14 +218,6 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
         }
       });
     }
-    setState(() => loadingPhoto = false);
-  }
-
-  Future<List<String>> _convertToEncodedList(List<XFile> imageList) async {
-    return await Future.wait(imageList.map((image) async {
-      List<int> imageBytes = await image.readAsBytes();
-      return base64Encode(imageBytes);
-    }).toList());
   }
 
   String _getTooltipMessage(String field) {
