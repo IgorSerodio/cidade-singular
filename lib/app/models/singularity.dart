@@ -29,6 +29,19 @@ class Singularity {
     required this.tags,
   });
 
+  Singularity.getDefault():
+      id = "",
+      visitingHours = "",
+      title = "",
+      description = "",
+      address = "",
+      city = "",
+      type = CreativeEconomyType.ARTS,
+      photos = [],
+      latLng = LatLng(0, 0),
+      tags = [];
+
+
   Singularity.fromMap(map)
       : id = map["_id"],
         visitingHours = map["visitingHours"],

@@ -13,6 +13,13 @@ class Ticket {
     required this.creator,
   });
 
+  Ticket.getDefault():
+      id = "",
+      name = "",
+      description = "",
+      singularity = "",
+      creator = "";
+
   Ticket.fromMap(Map<String, dynamic> map)
       : id = map["_id"],
         name = map["name"],

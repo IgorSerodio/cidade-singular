@@ -1,3 +1,4 @@
+import 'package:cidade_singular/app/models/creative_economy_type.dart';
 import 'package:cidade_singular/app/models/mission.dart';
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/ticket.dart';
@@ -101,9 +102,9 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
         _targetController == null ||
         _selectedRewardType == null ||
         _singularities.isEmpty ||
-        _selectedRewardType!.name == "TICKET"
+        (_selectedRewardType!.name == "TICKET"
           ? _tickets.isEmpty
-          : _titles.isEmpty) {
+          : _titles.isEmpty)) {
       if (widget.missionToEdit != null &&
           widget.missionToEdit!.description != null) {
         return widget.missionToEdit!.description;
@@ -112,10 +113,10 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
     }
 
     String singularityTitle =
-        _singularities.firstWhere((s) => s.id == _selectedSingularityId).title;
+        _singularities.firstWhere((s) => s.id == _selectedSingularityId, orElse:() => Singularity.getDefault()).title;
     String rewardName = _selectedRewardType!.name == "TICKET"
-        ? _tickets.firstWhere((t) => t.id == _selectedRewardId).name
-        : _titles.firstWhere((t) => t.id == _selectedRewardId).name;
+        ? _tickets.firstWhere((t) => t.id == _selectedRewardId, orElse: () => Ticket.getDefault()).name
+        : _titles.firstWhere((t) => t.id == _selectedRewardId, orElse: () => model.Title.getDefault()).name;
     RewardType rewardType = _selectedRewardType!;
 
     return "${taskText[_selectedTask]} $_selectedTarget vezes a singularidade $singularityTitle para ganhar o ${rewardType.name.toLowerCase()} $rewardName. $_extraDescription";

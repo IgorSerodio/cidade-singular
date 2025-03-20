@@ -13,6 +13,13 @@ class Title {
     required this.creator,
   });
 
+  Title.getDefault():
+        id = "",
+        name = "",
+        description = "",
+        singularity = "",
+        creator = "";
+
   Title.fromMap(Map<String, dynamic> map)
       : id = map["_id"],
         name = map["name"],
