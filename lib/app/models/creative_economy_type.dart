@@ -1,5 +1,4 @@
 enum CreativeEconomyType {
-  from,
   ARTS,
   CRAFTS,
   FILM,
@@ -9,7 +8,13 @@ enum CreativeEconomyType {
   MUSIC,
 }
 
+final Map<String, CreativeEconomyType> creativeTypeFromString =  {
+  for(var type in CreativeEconomyType.values)
+    type.name: type,
+};
+
 extension CreativeEconomyTypeExtension on CreativeEconomyType {
+
   String get value {
     switch (this) {
       case CreativeEconomyType.ARTS:
@@ -30,25 +35,4 @@ extension CreativeEconomyTypeExtension on CreativeEconomyType {
         return "Não definido";
     }
   }
-
-  operator [](String key) => (name) {
-    switch (name) {
-      case 'ARTS':
-        return CreativeEconomyType.ARTS;
-      case 'CRAFTS':
-        return CreativeEconomyType.CRAFTS;
-      case 'DESIGN':
-        return CreativeEconomyType.DESIGN;
-      case 'FILM':
-        return CreativeEconomyType.FILM;
-      case 'GASTRONOMY':
-        return CreativeEconomyType.GASTRONOMY;
-      case 'LITERATURE':
-        return CreativeEconomyType.LITERATURE;
-      case 'MUSIC':
-        return CreativeEconomyType.MUSIC;
-      default:
-        return null;
-    }
-  }(key);
 }

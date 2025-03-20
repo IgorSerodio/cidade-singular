@@ -48,7 +48,7 @@ class User {
         name = map["name"],
         description = map["description"] ?? "",
         type = UserType._from[map["type"]],
-        curatorType = map["curator_type"] != null ? CreativeEconomyType.from[map["curator_type"]] : null,
+        curatorType = creativeTypeFromString[map["curator_type"]],
         picture = map["picture"] ?? "",
         accessories = List<String>.from(map["accessories"] ?? []),
         equipped = List<String>.from(map["equipped"] ?? ["none", "none", "none"]),

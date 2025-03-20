@@ -49,7 +49,7 @@ class Singularity {
         description = map["description"],
         address = map["address"],
         city = map["city"],
-        type = CreativeEconomyType.from[map["type"]],
+        type = creativeTypeFromString[map["type"]]!,
         photos = List<String>.from(map["photos"]),
         latLng = LatLng(map["lat"], map["lng"]),
         creator = map["creator"],

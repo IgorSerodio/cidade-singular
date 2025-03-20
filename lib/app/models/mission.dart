@@ -26,7 +26,7 @@ class Mission {
         tags = List<String>.from(map["tags"] ?? []),
         target = map["target"],
         reward = map["reward"],
-        rewardType = RewardType._from[map["rewardType"]],
+        rewardType = rewardTypeFromString[map["rewardType"]]!,
         sponsor = map["sponsor"];
 
   Map<String, dynamic> toMap() {
@@ -43,11 +43,16 @@ class Mission {
 }
 
 enum RewardType {
-  _from,
   ACCESSORY,
   TICKET,
   TITLE,
 }
+
+final Map<String, RewardType> rewardTypeFromString =  {
+  for(var type in RewardType.values)
+    type.name: type,
+};
+
 
 extension RewardTypeExtension on RewardType {
 
@@ -63,17 +68,4 @@ extension RewardTypeExtension on RewardType {
         return "Não definido";
     }
   }
-
-  operator [](String key) => (name) {
-    switch (name) {
-      case 'ACCESSORY':
-        return RewardType.ACCESSORY;
-      case 'TICKET':
-        return RewardType.TICKET;
-      case 'TITLE':
-        return RewardType.TITLE;
-      default:
-        return null;
-    }
-  }(key);
 }

@@ -34,7 +34,7 @@ class SingularityRequest {
         photos = List<String>.from(map["photos"] ?? []),
         city = map["city"] ?? "",
         creator = map["creator"],
-        type = CreativeEconomyType.from[map["type"]],
+        type = creativeTypeFromString[map["type"]] ?? CreativeEconomyType.ARTS,
         tags = List<String>.from(map["tags"] ?? []);
 
   Map<String, dynamic> toMap() {

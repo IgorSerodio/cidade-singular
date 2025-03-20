@@ -1,8 +1,10 @@
 enum TaskType { VISIT, REVIEW, CUSTOM}
 
+
+
 class MissionProgressUtils {
 
-  static final Map<String, TaskType> stringToTaskType = {
+  static final Map<String, TaskType> taskTypeFromString = {
     for (var type in TaskType.values) type.name: type
   };
 

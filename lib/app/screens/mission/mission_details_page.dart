@@ -61,7 +61,7 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
       _selectedSingularityId = widget.missionToEdit!.tags.first;
       _selectedRewardType = widget.missionToEdit!.rewardType;
       _selectedRewardId = widget.missionToEdit!.reward;
-      _selectedTask = MissionProgressUtils.stringToTaskType[widget.missionToEdit!.tags[1]];
+      _selectedTask = MissionProgressUtils.taskTypeFromString[widget.missionToEdit!.tags[1]];
       _selectedTarget = widget.missionToEdit!.target.toString();
       _targetController.text = _selectedTarget!;
     }
