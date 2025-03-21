@@ -32,19 +32,18 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
 
   onSelect(CreativeEconomyType type) {
     setState(() {
-      if (type.value == selected.value) {
-        selected = CreativeEconomyType.values.first;
-        widget.onChoose.call(null);
+      if (selected!=null && type.value == selected!.value) {
+        selected = null;
       } else {
         selected = type;
-        widget.onChoose.call(selected);
       }
+      widget.onChoose.call(selected);
     });
 
     _controller.forward().then((value) => _controller.reverse());
   }
 
-  CreativeEconomyType selected = CreativeEconomyType.values.first;
+  CreativeEconomyType? selected;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +67,7 @@ class _FilterTypeWidgetState extends State<FilterTypeWidget>
       children: types
           .map(
               (type) =>
-              Expanded(child: type.value == selected.value
+              Expanded(child: selected!=null && type.value == selected!.value
                   ? AnimatedBuilder(
                 animation: animation,
                 child: buildTypeWidget(type, isSelected: true),
