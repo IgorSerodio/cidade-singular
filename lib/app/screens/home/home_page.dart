@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
       if (isCurator)
         MenuPageModel(
           name: "Requisições",
-          svgIconPath: "assets/images/info.svg",
+          svgIconPath: "assets/images/menu.svg",
           page: SingularityRequestListPage(),
         ),
       if (!isCurator)
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
       if (isEntrepreneur)
         MenuPageModel(
           name: "Conta",
-          svgIconPath: "assets/images/info.svg",
+          svgIconPath: "assets/images/menu.svg",
           page: EntrepreneurPage(),
         ),
     ];
