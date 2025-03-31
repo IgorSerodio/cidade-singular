@@ -35,6 +35,10 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
   late TextEditingController visitingHoursController;
   late TextEditingController addressController;
   late TextEditingController descriptionController;
+  late TextEditingController phoneController;
+  late TextEditingController emailController;
+
+  final int minMaturity = 2;
 
   @override
   void initState() {
@@ -46,6 +50,8 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
     visitingHoursController = TextEditingController(text: widget.request.visitingHours);
     addressController = TextEditingController(text: widget.request.address);
     descriptionController = TextEditingController(text: widget.request.description);
+    phoneController = TextEditingController(text: widget.request.phone);
+    emailController = TextEditingController(text: widget.request.email);
   }
 
   Future<void> _approveRequest() async {
@@ -115,6 +121,8 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
     widget.request.visitingHours = visitingHoursController.text;
     widget.request.address = addressController.text;
     widget.request.description = descriptionController.text;
+    widget.request.email = emailController.text != ""? emailController.text : null;
+    widget.request.phone = phoneController.text != ""? phoneController.text : null;
     List<String> encodedNewPhotos = await SingularityResquestUtils.convertToEncodedList(newPhotos);
     bool success = await requestService.update(widget.request, newPhotos: encodedNewPhotos.isNotEmpty? encodedNewPhotos: null);
     if (success) {
@@ -242,38 +250,73 @@ class _SingularityRequestDetailsPageState extends State<SingularityRequestDetail
       appBar: AppBar(title: Text("Detalhes da Requisição")),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _photoListWidget(),
-            TextField(controller: titleController, enabled: isCreator, decoration: InputDecoration(labelText: "Título")),
-            TextField(controller: visitingHoursController, enabled: isCreator, decoration: InputDecoration(labelText: "Horário de Visitação")),
-            TextField(controller: addressController, enabled: isCreator, decoration: InputDecoration(labelText: "Endereço")),
-            TextField(controller: descriptionController, enabled: isCreator, decoration: InputDecoration(labelText: "Descrição")),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (isCreator)
-                  ElevatedButton(
-                    onPressed: _updateRequest,
-                    child: Text("Salvar Alterações"),
-                  ),
-                if (isCurator)
-                  ElevatedButton(
-                    onPressed: _approveRequest,
-                    child: Text("Aprovar"),
-                  ),
-                if (isCreator || isCurator)
-                  ElevatedButton(
-                    onPressed: _deleteRequest,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: Text("Deletar"),
-                  ),
+                _photoListWidget(),
+                TextField(controller: titleController, enabled: isCreator, decoration: InputDecoration(labelText: "Título")),
+                TextField(controller: visitingHoursController, enabled: isCreator, decoration: InputDecoration(labelText: "Horário de Visitação")),
+                TextField(controller: addressController, enabled: isCreator, decoration: InputDecoration(labelText: "Endereço")),
+                TextField(controller: descriptionController, enabled: isCreator, decoration: InputDecoration(labelText: "Descrição")),
+                SizedBox(height: 20),
+                if(isCreator || widget.request.email != null || widget.request.email != null)
+                  Text("Contato", style: TextStyle(fontWeight: FontWeight.bold)),
+                if(isCreator || widget.request.email != null)
+                  TextField(controller: emailController, enabled: isCreator, decoration: InputDecoration(labelText: "E-mail para contato")),
+                if(isCreator || widget.request.phone != null)
+                  TextField(controller: phoneController, enabled: isCreator, decoration: InputDecoration(labelText: "Telefone para contato")),
+                SizedBox(height: 20),
+                Text("O Curador usa um conjunto de critérios de maturidade comprovados pelo empreendedor para avaliar o cadastro do empreendimento ou obra, com base na 1) visita in loco do curador ao empreendimento, 2) com base na sua consulta dos comentários e sugestões dos visitantes, e 3) com base na verificação dos critérios comprovados pelo empreendedor. O Curador atribui o nível de maturidade e edita o cadastro da singularidade com o selo correspondente. O selo do nível de maturidade do empreendimento será publicado junto com as informações no mapa da Cidade Singular. O empreendedor terá um botão de acesso a uma tela com a descrição do Selo Internacional de Empreendimento Singular e do Programa de Capacitação para progredir nos 5 níveis do selo. Cada Curador é coordenador do Programa do Selo para a área da economia criativa e será remunerado por esse trabalho. Terá menos funções do que o curador titular mas também poderá ser remunerado pelo empreendedor que recebe sua curadoria pela sua atuação como agente de marketing e vendas."),
+                SizedBox(height: 20),
+                Text("Nível de Maturidade", style: TextStyle(fontWeight: FontWeight.bold)),
+                Slider(
+                  value: widget.request.maturity.toDouble(),
+                  min: 0,
+                  max: 5,
+                  divisions: 5,
+                  label: widget.request.maturity.toString(),
+                  onChanged: isCurator
+                      ? (value) {
+                          setState(() {
+                            widget.request.maturity = value.toInt();
+                          });
+                      }
+                      : null,
+                  onChangeEnd: isCurator ? (value) => _updateRequest() : null,
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    if (isCreator)
+                      ElevatedButton(
+                        onPressed: _updateRequest,
+                        child: Text("Salvar Alterações"),
+                      ),
+                    if (isCurator)
+                      ElevatedButton(
+                        onPressed: widget.request.maturity < minMaturity
+                            ? () => ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text("Nível de maturidade insuficiente."))
+                                    ,)
+                            : _approveRequest,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: widget.request.maturity < minMaturity ? Colors.grey : Colors.blue,
+                        ),
+                        child: Text("Publicar"),
+                      ),
+                    if (isCreator)
+                      ElevatedButton(
+                        onPressed: _deleteRequest,
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        child: Text("Deletar"),
+                      ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
+        )
       ),
     );
   }

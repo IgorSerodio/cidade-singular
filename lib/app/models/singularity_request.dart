@@ -11,6 +11,9 @@ class SingularityRequest {
   CreativeEconomyType type;
   List<String> tags;
   String city;
+  int maturity;
+  String? email;
+  String? phone;
 
   SingularityRequest({
     required this.id,
@@ -23,6 +26,9 @@ class SingularityRequest {
     required this.type,
     this.photos = const [],
     this.tags = const [],
+    this.maturity = 0,
+    this.phone,
+    this.email,
   });
 
   SingularityRequest.fromMap(Map<String, dynamic> map)
@@ -35,7 +41,10 @@ class SingularityRequest {
         city = map["city"] ?? "",
         creator = map["creator"],
         type = creativeTypeFromString[map["type"]] ?? CreativeEconomyType.ARTS,
-        tags = List<String>.from(map["tags"] ?? []);
+        tags = List<String>.from(map["tags"] ?? []),
+        maturity = map["maturity"] ?? 0,
+        phone = map["phone"],
+        email = map["email"];
 
   Map<String, dynamic> toMap() {
     return {
@@ -48,6 +57,9 @@ class SingularityRequest {
       "type": type.name,
       "tags": tags,
       "city": city,
+      "maturity": maturity,
+      if(email!=null)"email": email,
+      if(phone!=null)"phone": phone,
     };
   }
 }

@@ -28,6 +28,8 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
   String address = "";
   CreativeEconomyType? type;
   String description = "";
+  String? phone;
+  String? email;
 
   @override
   void initState() {
@@ -47,7 +49,10 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
           description: description,
           creator: userStore.user!.id,
           photos: await SingularityResquestUtils.convertToEncodedList(photos),
-          city: cityStore.city!.id);
+          city: cityStore.city!.id,
+          phone: phone!=""? phone : null,
+          email: email!=""? email : null,
+      );
 
       bool success = await requestService.create(request);
       if (success) {
@@ -92,6 +97,12 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
                 _buildTextField("Descrição", "Descreva seu empreendimento",
                     (value) => description = value),
                 SizedBox(height: 20),
+                Text("Contato", style: TextStyle(fontWeight: FontWeight.bold)),
+                _buildTextField("E-mail", "Escreva um e-mail",
+                    (value) => email = value, optional: true),
+                _buildTextField("Número de telefone", "Digite um número de telefone",
+                    (value) => phone = value, optional: true),
+                SizedBox(height: 20),
                 Center(
                   child: ElevatedButton(
                     onPressed: _submitForm,
@@ -107,7 +118,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
   }
 
   Widget _buildTextField(String label, String hint, Function(String) onSaved,
-      {int maxLines = 1}) {
+      {int maxLines = 1, optional = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
@@ -119,7 +130,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
         ),
         maxLines: maxLines,
         validator: (value) =>
-            value == null || value.isEmpty ? "Campo obrigatório" : null,
+            !optional && (value == null || value.isEmpty) ? "Campo obrigatório" : null,
         onSaved: (value) => onSaved(value!),
       ),
     );
@@ -232,6 +243,10 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
         return "Selecione o tipo de economia criativa.";
       case "Descrição":
         return "Descreva seu empreendimento.";
+      case "E-mail"  :
+        return "Informe um e-mail para contato (opcional)";
+      case "Número de telefone" :
+        return "Informe um número de telefone contato (opcional)";
       default:
         return "";
     }
