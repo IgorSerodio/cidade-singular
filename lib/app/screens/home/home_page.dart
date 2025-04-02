@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
 
     List<MenuPageModel> pages = [
       MenuPageModel(
-        name: "Cidade",
+        name: !isCurator? "Cidade" : "Início",
         svgIconPath: "assets/images/city.svg",
         page: CityPage(),
       ),

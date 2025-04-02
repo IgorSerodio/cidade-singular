@@ -1,7 +1,6 @@
 import 'package:cidade_singular/app/models/city.dart';
 import 'package:cidade_singular/app/models/progress.dart';
 import 'package:cidade_singular/app/models/owned_ticket.dart';
-import 'package:cidade_singular/app/models/singularity.dart';
 
 import 'creative_economy_type.dart';
 
@@ -55,7 +54,8 @@ class User {
         titles = List<String>.from(map["titles"] ?? []),
         tickets = List<OwnedTicket>.from(map["tickets"]?.map((item) => OwnedTicket.fromMap(item)) ?? []),
         progress = List<Progress>.from(map["progress"]?.map((item) => Progress.fromMap(item)) ?? []),
-        xp = map["xp"] ?? 0;
+        xp = map["xp"] ?? 0,
+        city = map["city"]!=null? City.fromMap(map["city"]): null;
 }
 
 enum UserType {
