@@ -1,6 +1,20 @@
 enum TaskType { VISIT, REVIEW, CUSTOM}
 
+extension TaskTypeExtension on TaskType {
 
+  String get value {
+    switch (this) {
+      case TaskType.VISIT:
+        return "Visitar";
+      case TaskType.REVIEW:
+        return "Avaliar";
+      case TaskType.CUSTOM:
+        return "Personalizado";
+      default:
+        return "Não definido";
+    }
+  }
+}
 
 class MissionProgressUtils {
 

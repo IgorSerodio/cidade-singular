@@ -148,7 +148,7 @@ class _SingularityRequestPageState extends State<SingularityRequestPage> {
         items: CreativeEconomyType.values.map((type) {
           return DropdownMenuItem(
             value: type,
-            child: Text(type.name),
+            child: Text(type.value),
           );
         }).toList(),
         validator: (value) => value == null ? "Selecione um tipo" : null,

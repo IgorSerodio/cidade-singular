@@ -119,7 +119,7 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
         : _titles.firstWhere((t) => t.id == _selectedRewardId, orElse: () => model.Title.getDefault()).name;
     RewardType rewardType = _selectedRewardType!;
 
-    return "${taskText[_selectedTask]} $_selectedTarget vezes a singularidade $singularityTitle para ganhar o ${rewardType.name.toLowerCase()} $rewardName. $_extraDescription";
+    return "${taskText[_selectedTask]} $_selectedTarget vezes a singularidade $singularityTitle para ganhar o ${rewardType.value.toLowerCase()} $rewardName. $_extraDescription";
   }
 
   void _createOrUpdateMission() async {
@@ -256,7 +256,7 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
                   value: _selectedTask,
                   items: TaskType.values.map((task) {
                     return DropdownMenuItem(
-                        value: task, child: Text(task.name));
+                        value: task, child: Text(task.value));
                   }).toList(),
                   onChanged: (value) => setState(() => _selectedTask = value),
                   validator: (value) =>
@@ -306,7 +306,7 @@ class _MissionDetailsPageState extends State<MissionDetailsPage> {
                   items: RewardType.values.where((type) => type != RewardType.ACCESSORY)
                       .map((type) {
                     return DropdownMenuItem(
-                        value: type, child: Text(type.name));
+                        value: type, child: Text(type.value));
                   }).toList(),
                   onChanged: (value) =>
                       setState(() => _selectedRewardType = value),
