@@ -29,6 +29,33 @@ class MapPage extends StatefulWidget {
   createState() => _MapPageState();
 }
 
+class _SingularityTitle extends StatelessWidget{
+
+  const _SingularityTitle(this.name, this.globalKey);
+  final GlobalKey globalKey;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+        key: globalKey,
+        child:Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black87.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            name,
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        )
+    );
+  }
+}
+
 class _AvatarMarker extends StatelessWidget{
 
   _AvatarMarker(this.globalKey);
@@ -64,32 +91,40 @@ class _MapPageState extends State<MapPage> {
   UserStore userStore = Modular.get();
   bool loading = false;
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  List<Singularity> singularities = [];
+  Map<String, GlobalKey> singularityTitleKeys = {};
+  Set<Marker> markers = {};
   final GlobalKey globalKey = GlobalKey();
 
   @override
   initState() {
     super.initState();
     getSingularities();
+    loadSingularityMarkers();
     Timer.periodic(const Duration(seconds: 1), (Timer _) {
       if(mounted) updateAvatar();
     });
   }
 
-  Set<Marker> markers = {};
-
-  List<Singularity> singularities = [];
-
   getSingularities({CreativeEconomyType? type}) async {
-    setState(() => loading = true);
     singularities = await service.getSingularities(query: {
       "city": cityStore.city.id,
       if (type != null) "type": type.name,
     });
+
+    singularityTitleKeys.clear();
+    for (final sing in singularities) {
+      singularityTitleKeys[sing.id] = GlobalKey();
+    }
+  }
+
+  loadSingularityMarkers() async {
+    setState(() => loading = true);
     var icons = await loadBitmapIcons();
-    Set<Marker> newMarkers = singularities.map((sing) {
-      MarkerId markerId = MarkerId(sing.id);
-      return Marker(
-        markerId: markerId,
+    Set<Marker> newMarkers = {};
+    for (Singularity sing in singularities){
+      Marker marker = Marker(
+        markerId: MarkerId(sing.id),
         position: sing.latLng,
         icon: icons[sing.type.name] ?? BitmapDescriptor.defaultMarker,
         onTap: () {
@@ -97,7 +132,13 @@ class _MapPageState extends State<MapPage> {
           Navigator.push(context, MaterialPageRoute(builder: (context) => SingularityPage(singularity: sing)),);
         },
       );
-    }).toSet();
+      Marker markerTitle = Marker(
+        markerId: MarkerId("${sing.id}-t"),
+        position: sing.latLng,
+        icon: await MarkerIcon.widgetToIcon(singularityTitleKeys[sing.id]!),
+      );
+      newMarkers.addAll([marker, markerTitle]);
+    }
     if(avatar!=null) newMarkers.add(avatar!);
     setState(() {
       markers = newMarkers;
@@ -106,8 +147,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   void addCustomIcon() async {
-    BitmapDescriptor temp = await MarkerIcon.widgetToIcon(globalKey);
-    if(temp!=null) markerIcon = temp;
+    BitmapDescriptor icon = await MarkerIcon.widgetToIcon(globalKey);
+    if(icon!=null) markerIcon = icon;
   }
 
   Future<Position> getUserCurrentLocation() async {
@@ -137,6 +178,9 @@ class _MapPageState extends State<MapPage> {
       body: Stack(
         children: [
           _AvatarMarker(globalKey),
+          ...singularities.map((sing) {
+            return _SingularityTitle(sing.title, singularityTitleKeys[sing.id]!);
+          }),
           GoogleMap(
             myLocationEnabled: false,
             myLocationButtonEnabled: false,
@@ -169,6 +213,7 @@ class _MapPageState extends State<MapPage> {
             child: FilterTypeWidget(
               onChoose: (type) {
                 getSingularities(type: type);
+                loadSingularityMarkers();
               },
             ),
           ),
