@@ -93,8 +93,8 @@ class _SingularityPageState extends State<SingularityPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isCreator = userStore.user!.id == widget.singularity.creator;
-    bool isCurator = userStore.user!.type == UserType.CURATOR && userStore.user!.curatorType == widget.singularity.type;
+    bool isCreator = userStore.user!= null && userStore.user!.id == widget.singularity.creator;
+    bool isCurator = userStore.user!= null && userStore.user!.type == UserType.CURATOR && userStore.user!.curatorType == widget.singularity.type;
 
     return Scaffold(
       body: CustomScrollView(
