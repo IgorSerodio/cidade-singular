@@ -103,7 +103,7 @@ class _MapPageState extends State<MapPage> {
     getSingularities();
   }
 
-  Future getSingularities() async {
+  getSingularities() async {
     setState(() => loading = true);
     singularities = await service.getSingularities(query: {
       "city": cityStore.city.id,
@@ -133,10 +133,8 @@ class _MapPageState extends State<MapPage> {
       );
       newMarkers.addAll([marker, markerTitle]);
     }
-    if(avatar==null) {
-      await updateAvatar();
-    }
-    newMarkers.add(avatar!);
+    Marker avatarMarker = await updateAvatar();
+    newMarkers.add(avatarMarker);
     setState(() {
       markers = newMarkers;
       shownMarkers = markers;
@@ -158,10 +156,8 @@ class _MapPageState extends State<MapPage> {
           filteredMarkers.add(marker);
         }
       }
-      if(avatar==null) {
-        await updateAvatar();
-      }
-      filteredMarkers.add(avatar!);
+      Marker avatarMarker = await updateAvatar();
+      filteredMarkers.add(avatarMarker);
       setState(()  {
         shownMarkers = filteredMarkers;
       });
@@ -181,9 +177,9 @@ class _MapPageState extends State<MapPage> {
     return filtered;
   }
 
-  void addCustomIcon() async {
+  Future<void> addCustomIcon() async {
     BitmapDescriptor icon = await MarkerIcon.widgetToIcon(globalKey);
-    if(icon!=null) markerIcon = icon;
+    markerIcon = icon;
   }
 
   Future<Position> getUserCurrentLocation() async {
@@ -340,24 +336,22 @@ class _MapPageState extends State<MapPage> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 
-  Marker? avatar;
-
-  Future updateAvatar() async {
-    await getUserCurrentLocation().then((value) {
-      if(markerIcon == BitmapDescriptor.defaultMarker) addCustomIcon();
-      avatar = Marker(
-          markerId: const MarkerId("main"),
-          position: LatLng(value.latitude, value.longitude),
-          draggable: false,
-          icon: markerIcon
-      );
-      shownMarkers.remove(avatar);
-      markers.remove(avatar);
-      setState(() {
-        shownMarkers.add(avatar!);
-        markers.add(avatar!);
-      });
+  Future<Marker> updateAvatar() async {
+    final location = await getUserCurrentLocation();
+    if(markerIcon == BitmapDescriptor.defaultMarker) await addCustomIcon();
+    Marker avatar = Marker(
+        markerId: const MarkerId("main"),
+        position: LatLng(location.latitude, location.longitude),
+        draggable: false,
+        icon: markerIcon
+    );
+    shownMarkers.remove(avatar);
+    markers.remove(avatar);
+    setState(() {
+      shownMarkers.add(avatar);
+      markers.add(avatar);
     });
+    return avatar;
   }
 
   void handleVisit(Singularity sing) async {
