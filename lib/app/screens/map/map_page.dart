@@ -139,7 +139,7 @@ class _MapPageState extends State<MapPage> {
       );
       newMarkers.addAll([marker, markerTitle]);
     }
-    newMarkers.add(avatar!);
+    if(avatar!=null) newMarkers.add(avatar!);
     setState(() {
       markers = newMarkers;
       shownMarkers = markers;
@@ -158,7 +158,7 @@ class _MapPageState extends State<MapPage> {
           filteredMarkers.add(marker);
         }
       }
-      filteredMarkers.add(avatar!);
+      if(avatar!=null) filteredMarkers.add(avatar!);
       setState(()  {
         shownMarkers = filteredMarkers;
       });
