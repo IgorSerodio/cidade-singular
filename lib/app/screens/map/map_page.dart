@@ -100,13 +100,7 @@ class _MapPageState extends State<MapPage> {
   @override
   initState() {
     super.initState();
-    updateAvatar().then((_) {
-      getSingularities().then((_){
-        Timer.periodic(const Duration(seconds: 1), (Timer __) {
-          if(mounted) updateAvatar();
-        });
-      });
-    });
+    getSingularities();
   }
 
   Future getSingularities() async {
@@ -139,15 +133,21 @@ class _MapPageState extends State<MapPage> {
       );
       newMarkers.addAll([marker, markerTitle]);
     }
-    if(avatar!=null) newMarkers.add(avatar!);
+    if(avatar==null) {
+      await updateAvatar();
+    }
+    newMarkers.add(avatar!);
     setState(() {
       markers = newMarkers;
       shownMarkers = markers;
       loading = false;
     });
+    Timer.periodic(const Duration(seconds: 1), (Timer __) {
+      if(mounted) updateAvatar();
+    });
   }
 
-  loadSingularityMarkers({CreativeEconomyType? type}) async {
+  filterSingularityMarkers({CreativeEconomyType? type}) async {
     setState(() => loading = true);
     if(type!=null) {
       Map<String, Singularity> filteredSingularities = filterByType(type);
@@ -158,7 +158,10 @@ class _MapPageState extends State<MapPage> {
           filteredMarkers.add(marker);
         }
       }
-      if(avatar!=null) filteredMarkers.add(avatar!);
+      if(avatar==null) {
+        await updateAvatar();
+      }
+      filteredMarkers.add(avatar!);
       setState(()  {
         shownMarkers = filteredMarkers;
       });
@@ -244,7 +247,7 @@ class _MapPageState extends State<MapPage> {
             bottom: 86,
             child: FilterTypeWidget(
               onChoose: (type) {
-                loadSingularityMarkers(type: type);
+                filterSingularityMarkers(type: type);
               },
             ),
           ),
@@ -340,7 +343,7 @@ class _MapPageState extends State<MapPage> {
   Marker? avatar;
 
   Future updateAvatar() async {
-    getUserCurrentLocation().then((value) {
+    await getUserCurrentLocation().then((value) {
       if(markerIcon == BitmapDescriptor.defaultMarker) addCustomIcon();
       avatar = Marker(
           markerId: const MarkerId("main"),
