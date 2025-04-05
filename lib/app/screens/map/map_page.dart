@@ -156,7 +156,7 @@ class _MapPageState extends State<MapPage> {
           filteredMarkers.add(marker);
         }
       }
-      Marker avatarMarker = await updateAvatar();
+      Marker avatarMarker = await updateAvatar(updateLocation: false);
       filteredMarkers.add(avatarMarker);
       setState(()  {
         shownMarkers = filteredMarkers;
@@ -336,8 +336,15 @@ class _MapPageState extends State<MapPage> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 
-  Future<Marker> updateAvatar() async {
-    final location = await getUserCurrentLocation();
+  Position? lastKnownLocation;
+
+  Future<Marker> updateAvatar({bool updateLocation = true}) async {
+    late Position location;
+    if(updateLocation || lastKnownLocation == null){
+      location = await getUserCurrentLocation();
+    } else {
+      location = lastKnownLocation ?? await getUserCurrentLocation();
+    }
     if(markerIcon == BitmapDescriptor.defaultMarker) await addCustomIcon();
     Marker avatar = Marker(
         markerId: const MarkerId("main"),
