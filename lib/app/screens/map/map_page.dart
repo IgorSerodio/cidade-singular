@@ -93,33 +93,33 @@ class _MapPageState extends State<MapPage> {
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   List<Singularity> singularities = [];
   Map<String, GlobalKey> singularityTitleKeys = {};
+  Set<Marker> shownMarkers = {};
   Set<Marker> markers = {};
   final GlobalKey globalKey = GlobalKey();
 
   @override
   initState() {
     super.initState();
-    getSingularities();
-    loadSingularityMarkers();
-    Timer.periodic(const Duration(seconds: 1), (Timer _) {
-      if(mounted) updateAvatar();
+    updateAvatar().then((_) {
+      getSingularities().then((_){
+        Timer.periodic(const Duration(seconds: 1), (Timer __) {
+          if(mounted) updateAvatar();
+        });
+      });
     });
   }
 
-  getSingularities({CreativeEconomyType? type}) async {
+  Future getSingularities() async {
+    setState(() => loading = true);
     singularities = await service.getSingularities(query: {
       "city": cityStore.city.id,
-      if (type != null) "type": type.name,
     });
 
     singularityTitleKeys.clear();
     for (final sing in singularities) {
       singularityTitleKeys[sing.id] = GlobalKey();
     }
-  }
 
-  loadSingularityMarkers() async {
-    setState(() => loading = true);
     var icons = await loadBitmapIcons();
     Set<Marker> newMarkers = {};
     for (Singularity sing in singularities){
@@ -139,11 +139,43 @@ class _MapPageState extends State<MapPage> {
       );
       newMarkers.addAll([marker, markerTitle]);
     }
-    if(avatar!=null) newMarkers.add(avatar!);
+    newMarkers.add(avatar!);
     setState(() {
       markers = newMarkers;
+      shownMarkers = markers;
       loading = false;
     });
+  }
+
+  loadSingularityMarkers({CreativeEconomyType? type}) async {
+    setState(() => loading = true);
+    if(type!=null) {
+      Map<String, Singularity> filteredSingularities = filterByType(type);
+      Set<Marker> filteredMarkers = {};
+      for(Marker marker in markers){
+        if(filteredSingularities[marker.markerId.value] != null ||
+           filteredSingularities[marker.markerId.value.substring(0, marker.markerId.value.length-2)] != null){
+          filteredMarkers.add(marker);
+        }
+      }
+      filteredMarkers.add(avatar!);
+      setState(()  {
+        shownMarkers = filteredMarkers;
+      });
+    } else {
+      setState(() => shownMarkers = markers);
+    }
+    setState(() => loading = false);
+  }
+
+  Map<String, Singularity> filterByType (CreativeEconomyType type){
+    Map<String, Singularity> filtered = {};
+    for(Singularity sing in singularities){
+      if(sing.type == type){
+        filtered[sing.id] = sing;
+      }
+    }
+    return filtered;
   }
 
   void addCustomIcon() async {
@@ -196,7 +228,7 @@ class _MapPageState extends State<MapPage> {
               changeMapMode();
               setState(() {});
             },
-            markers: markers,
+            markers: shownMarkers,
           ),
           if (loading)
             Container(
@@ -212,8 +244,7 @@ class _MapPageState extends State<MapPage> {
             bottom: 86,
             child: FilterTypeWidget(
               onChoose: (type) {
-                getSingularities(type: type);
-                loadSingularityMarkers();
+                loadSingularityMarkers(type: type);
               },
             ),
           ),
@@ -308,17 +339,19 @@ class _MapPageState extends State<MapPage> {
 
   Marker? avatar;
 
-  void updateAvatar() {
+  Future updateAvatar() async {
     getUserCurrentLocation().then((value) {
       if(markerIcon == BitmapDescriptor.defaultMarker) addCustomIcon();
+      avatar = Marker(
+          markerId: const MarkerId("main"),
+          position: LatLng(value.latitude, value.longitude),
+          draggable: false,
+          icon: markerIcon
+      );
+      shownMarkers.remove(avatar);
+      markers.remove(avatar);
       setState(() {
-        avatar = Marker(
-            markerId: const MarkerId("main"),
-            position: LatLng(value.latitude, value.longitude),
-            draggable: false,
-            icon: markerIcon
-        );
-        markers.remove(avatar);
+        shownMarkers.add(avatar!);
         markers.add(avatar!);
       });
     });
