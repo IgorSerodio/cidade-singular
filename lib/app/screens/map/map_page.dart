@@ -17,6 +17,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'dart:ui' as ui;
 
 import '../../models/creative_economy_type.dart';
@@ -95,11 +96,14 @@ class _MapPageState extends State<MapPage> {
   Map<String, GlobalKey> singularityTitleKeys = {};
   Set<Marker> shownMarkers = {};
   Set<Marker> markers = {};
+  Location location = Location();
+  LocationData? currentLocation;
   final GlobalKey globalKey = GlobalKey();
 
   @override
   initState() {
     super.initState();
+    getUserLocation();
     getSingularities();
   }
 
@@ -133,15 +137,12 @@ class _MapPageState extends State<MapPage> {
       );
       newMarkers.addAll([marker, markerTitle]);
     }
-    Marker avatarMarker = await updateAvatar();
+    Marker avatarMarker = await updateAvatar(updateMarkers: false);
     newMarkers.add(avatarMarker);
     setState(() {
       markers = newMarkers;
       shownMarkers = markers;
       loading = false;
-    });
-    Timer.periodic(const Duration(seconds: 1), (Timer __) {
-      if(mounted) updateAvatar();
     });
   }
 
@@ -156,7 +157,7 @@ class _MapPageState extends State<MapPage> {
           filteredMarkers.add(marker);
         }
       }
-      Marker avatarMarker = await updateAvatar(updateLocation: false);
+      Marker avatarMarker = await updateAvatar(updateMarkers: false);
       filteredMarkers.add(avatarMarker);
       setState(()  {
         shownMarkers = filteredMarkers;
@@ -182,13 +183,29 @@ class _MapPageState extends State<MapPage> {
     markerIcon = icon;
   }
 
-  Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission().then((value){
-    }).onError((error, stackTrace) async {
-      await Geolocator.requestPermission();
-      print("ERROR"+error.toString());
+  getUserLocation() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    permissionGranted = await location.requestPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      return;
+    }
+
+    currentLocation = await location.getLocation();
+    location.onLocationChanged.listen((newLocation) {
+        currentLocation = newLocation;
+        updateAvatar();
     });
-    return await Geolocator.getCurrentPosition();
+    updateAvatar();
   }
 
   changeMapMode() {
@@ -224,8 +241,9 @@ class _MapPageState extends State<MapPage> {
             ),
             onMapCreated: (GoogleMapController controller) {
               _controller = controller;
-              changeMapMode();
-              setState(() {});
+              setState(() {
+                changeMapMode();
+              });
             },
             markers: shownMarkers,
           ),
@@ -336,50 +354,46 @@ class _MapPageState extends State<MapPage> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 
-  Position? lastKnownLocation;
-
-  Future<Marker> updateAvatar({bool updateLocation = true}) async {
-    late Position location;
-    if(updateLocation || lastKnownLocation == null){
-      location = await getUserCurrentLocation();
-    } else {
-      location = lastKnownLocation ?? await getUserCurrentLocation();
-    }
+  Future<Marker> updateAvatar({bool updateMarkers = true}) async {
+    double lat = currentLocation?.latitude ?? 0.0;
+    double lon = currentLocation?.longitude ?? 0.0;
     if(markerIcon == BitmapDescriptor.defaultMarker) await addCustomIcon();
     Marker avatar = Marker(
         markerId: const MarkerId("main"),
-        position: LatLng(location.latitude, location.longitude),
+        position: LatLng(lat, lon),
         draggable: false,
         icon: markerIcon
     );
-    shownMarkers.remove(avatar);
-    markers.remove(avatar);
-    setState(() {
-      shownMarkers.add(avatar);
-      markers.add(avatar);
-    });
+    if(updateMarkers) {
+      shownMarkers.remove(avatar);
+      markers.remove(avatar);
+      setState(() {
+        shownMarkers.add(avatar);
+        markers.add(avatar);
+      });
+    }
     return avatar;
   }
 
   void handleVisit(Singularity sing) async {
     const minDistance = 50;
     if(userStore.user!=null){
-      getUserCurrentLocation().then((userPosition) {
-        double distance = Geolocator.distanceBetween(
-          userPosition.latitude,
-          userPosition.longitude,
-          sing.latLng.latitude,
-          sing.latLng.longitude,
+      double lat = currentLocation?.latitude ?? 0.0;
+      double lon = currentLocation?.longitude ?? 0.0;
+      double distance = Geolocator.distanceBetween(
+        lat,
+        lon,
+        sing.latLng.latitude,
+        sing.latLng.longitude,
+      );
+      if(distance<=minDistance) {
+        userService.increaseProgress(
+            id: userStore.user!.id,
+            cityId: cityStore.city!.id,
+            tags: [sing.id, TaskType.VISIT.name, sing.type.name] + sing.tags,
+            source: MissionProgressUtils.formatSource(sing.id),
         );
-        if(distance<=minDistance) {
-          userService.increaseProgress(
-              id: userStore.user!.id,
-              cityId: cityStore.city!.id,
-              tags: [sing.id, TaskType.VISIT.name, sing.type.name] + sing.tags,
-              source: MissionProgressUtils.formatSource(sing.id),
-          );
-        }
-      });
+      }
     }
   }
 }

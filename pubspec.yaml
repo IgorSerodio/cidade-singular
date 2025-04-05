@@ -52,6 +52,7 @@ dependencies:
   custom_marker: ^1.0.0
   geocoding: ^3.0.0
   geocode: ^1.0.3
+  location: ^8.0.0
 
 dev_dependencies:
   flutter_test:
