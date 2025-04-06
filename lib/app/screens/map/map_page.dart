@@ -200,7 +200,6 @@ class _MapPageState extends State<MapPage> {
       return;
     }
 
-    currentLocation = await location.getLocation();
     location.onLocationChanged.listen((newLocation) {
         currentLocation = newLocation;
         updateAvatar();
