@@ -2,10 +2,15 @@ import 'dart:async';
 
 import 'package:cidade_singular/app/models/singularity.dart';
 import 'package:cidade_singular/app/models/user.dart';
+import 'package:cidade_singular/app/screens/map/avatar_marker.dart';
 import 'package:cidade_singular/app/screens/map/filter_type_widget.dart';
+import 'package:cidade_singular/app/screens/map/singularity_title_widget.dart';
+import 'package:cidade_singular/app/services/geolocator_service.dart';
 import 'package:cidade_singular/app/stores/user_store.dart';
 import 'package:cidade_singular/app/util/mission_progress_utils.dart';
 import 'package:custom_marker/marker_icon.dart';
+import 'package:cidade_singular/app/models/creative_economy_type.dart';
+import 'package:cidade_singular/app/screens/singularity_request/singularity_request_page.dart';
 import 'package:cidade_singular/app/screens/singularity/singularity_page.dart';
 import 'package:cidade_singular/app/services/user_service.dart';
 import 'package:cidade_singular/app/services/singularity_service.dart';
@@ -16,12 +21,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
 import 'dart:ui' as ui;
 
-import '../../models/creative_economy_type.dart';
-import '../singularity_request/singularity_request_page.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -30,62 +31,9 @@ class MapPage extends StatefulWidget {
   createState() => _MapPageState();
 }
 
-class _SingularityTitle extends StatelessWidget{
-
-  const _SingularityTitle(this.name, this.globalKey);
-  final GlobalKey globalKey;
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-        key: globalKey,
-        child:Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.black87.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            name,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        )
-    );
-  }
-}
-
-class _AvatarMarker extends StatelessWidget{
-
-  _AvatarMarker(this.globalKey);
-  final GlobalKey globalKey;
-  final UserStore userStore = Modular.get();
-
-  @override
-  Widget build(BuildContext context) {
-    double avatarHeight = 180.0;
-    return RepaintBoundary(
-      key: globalKey,
-      child: SizedBox(
-        height: avatarHeight,
-        width: avatarHeight*2/3,
-        child: Stack(
-          children: [
-            Image.asset("assets/images/avatar.png", fit: BoxFit.cover,),
-            if (userStore.user != null && userStore.user!.equipped[User.LEGS] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.LEGS]}.png", fit: BoxFit.cover,),
-            if (userStore.user != null && userStore.user!.equipped[User.TORSO] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.TORSO]}.png", fit: BoxFit.cover,),
-            if (userStore.user != null && userStore.user!.equipped[User.HEAD] != "none") Image.asset("assets/images/accessories/${userStore.user!.equipped[User.HEAD]}.png", fit: BoxFit.cover,),
-          ],
-        ),
-      )
-    );
-  }
-}
-
 class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
+  GeolocatorService geolocatorService = GeolocatorService();
   SingularityService service = Modular.get();
   UserService userService = Modular.get();
   CityStore cityStore = Modular.get();
@@ -96,14 +44,13 @@ class _MapPageState extends State<MapPage> {
   Map<String, GlobalKey> singularityTitleKeys = {};
   Set<Marker> shownMarkers = {};
   Set<Marker> markers = {};
-  Location location = Location();
-  LocationData? currentLocation;
+
   final GlobalKey globalKey = GlobalKey();
 
   @override
   initState() {
     super.initState();
-    getUserLocation();
+    geolocatorService.setOnLocationChange(updateAvatar);
     getSingularities();
   }
 
@@ -183,30 +130,6 @@ class _MapPageState extends State<MapPage> {
     markerIcon = icon;
   }
 
-  getUserLocation() async {
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return;
-      }
-    }
-
-    permissionGranted = await location.requestPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      return;
-    }
-
-    location.onLocationChanged.listen((newLocation) {
-        currentLocation = newLocation;
-        updateAvatar();
-    });
-    updateAvatar();
-  }
-
   changeMapMode() {
       getJsonFile("assets/images/mapMode.json").then(setMapStyle);
   }
@@ -217,78 +140,6 @@ class _MapPageState extends State<MapPage> {
 
   void setMapStyle(String mapStyle) {
     _controller.setMapStyle(mapStyle);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          _AvatarMarker(globalKey),
-          ...singularities.map((sing) {
-            return _SingularityTitle(sing.title, singularityTitleKeys[sing.id]!);
-          }),
-          GoogleMap(
-            myLocationEnabled: false,
-            myLocationButtonEnabled: false,
-            liteModeEnabled: false,
-            rotateGesturesEnabled: false,
-            mapType: MapType.normal,
-            initialCameraPosition: CameraPosition(
-              target: cityStore.city.latLng,
-              zoom: 13,
-            ),
-            onMapCreated: (GoogleMapController controller) {
-              _controller = controller;
-              setState(() {
-                changeMapMode();
-              });
-            },
-            markers: shownMarkers,
-          ),
-          if (loading)
-            Container(
-              color: Colors.black26,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Constants.primaryColor,
-                ),
-              ),
-            ),
-          Positioned.fill(
-            top: 0,
-            bottom: 86,
-            child: FilterTypeWidget(
-              onChoose: (type) {
-                filterSingularityMarkers(type: type);
-              },
-            ),
-          ),
-          if (userStore.user != null && userStore.user!.type == UserType.VISITOR)
-            Positioned(
-              top: 16,
-              right: 16,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Constants.primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: () {
-                  Modular.to.push(
-                    MaterialPageRoute(builder: (context) => SingularityRequestPage()));
-                },
-                child: const Text(
-                  "É empreendedor?\n Cadastre sua singularidade!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 
   Widget selectTypeWidget() {
@@ -354,8 +205,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<Marker> updateAvatar({bool updateMarkers = true}) async {
-    double lat = currentLocation?.latitude ?? 0.0;
-    double lon = currentLocation?.longitude ?? 0.0;
+    double lat = geolocatorService.currentLocation?.latitude ?? 0.0;
+    double lon = geolocatorService.currentLocation?.longitude ?? 0.0;
     if(markerIcon == BitmapDescriptor.defaultMarker) await addCustomIcon();
     Marker avatar = Marker(
         markerId: const MarkerId("main"),
@@ -377,14 +228,7 @@ class _MapPageState extends State<MapPage> {
   void handleVisit(Singularity sing) async {
     const minDistance = 50;
     if(userStore.user!=null){
-      double lat = currentLocation?.latitude ?? 0.0;
-      double lon = currentLocation?.longitude ?? 0.0;
-      double distance = Geolocator.distanceBetween(
-        lat,
-        lon,
-        sing.latLng.latitude,
-        sing.latLng.longitude,
-      );
+      double distance = geolocatorService.getDistanceFromUser(sing.latLng.latitude, sing.latLng.longitude);
       if(distance<=minDistance) {
         userService.increaseProgress(
             id: userStore.user!.id,
@@ -394,5 +238,77 @@ class _MapPageState extends State<MapPage> {
         );
       }
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          AvatarMarker(globalKey),
+          ...singularities.map((sing) {
+            return SingularityTitleWidget(sing.title, singularityTitleKeys[sing.id]!);
+          }),
+          GoogleMap(
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            liteModeEnabled: false,
+            rotateGesturesEnabled: false,
+            mapType: MapType.normal,
+            initialCameraPosition: CameraPosition(
+              target: cityStore.city.latLng,
+              zoom: 13,
+            ),
+            onMapCreated: (GoogleMapController controller) {
+              _controller = controller;
+              setState(() {
+                changeMapMode();
+              });
+            },
+            markers: shownMarkers,
+          ),
+          if (loading)
+            Container(
+              color: Colors.black26,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Constants.primaryColor,
+                ),
+              ),
+            ),
+          Positioned.fill(
+            top: 0,
+            bottom: 86,
+            child: FilterTypeWidget(
+              onChoose: (type) {
+                filterSingularityMarkers(type: type);
+              },
+            ),
+          ),
+          if (userStore.user != null && userStore.user!.type == UserType.VISITOR)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Constants.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  Modular.to.push(
+                      MaterialPageRoute(builder: (context) => SingularityRequestPage()));
+                },
+                child: const Text(
+                  "É empreendedor?\n Cadastre sua singularidade!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
