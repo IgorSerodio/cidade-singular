@@ -1,16 +1,86 @@
-# cidade_singular
+# Cidade Singular
 
-A new Flutter project.
+**Cidade Singular** é uma aplicação gamificada de apoio à economia criativa de cidades integrantes da **Rede Mundial de Cidades Criativas da UNESCO (UCCN)**. O projeto integra turismo cultural, empreendedorismo criativo e gamificação, promovendo o engajamento de visitantes, moradores, empreendedores e curadores na valorização do patrimônio cultural e ambiental urbano.
 
-## Getting Started
+Este repositório corresponde ao frontend da **versão 3.0** da aplicação, desenvolvida como Trabalho de Conclusão de Curso (TCC) no curso de **Ciência da Computação – UFCG**.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## Objetivo do Projeto
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+O objetivo do Cidade Singular é **ampliar a experiência cultural em cidades criativas**, indo além de guias turísticos tradicionais. A aplicação estimula a participação ativa dos usuários na economia criativa local por meio de:
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Exploração de singularidades culturais e ambientais
+- Gamificação da experiência turística
+- Empreendedorismo cultural
+- Curadoria colaborativa do espaço urbano
+
+A cidade-base do estudo e desenvolvimento é **Campina Grande – PB**, cidade membro da UCCN na categoria **Artes Midiáticas**.
+
+---
+
+## Conceitos-Chave
+
+- **Singularidade**: elemento cultural, ambiental ou criativo que representa a identidade única da cidade (ex.: restaurantes, obras, museus, eventos, espaços naturais).
+- **Gamificação**: uso de missões, recompensas, níveis e personalização de avatar para aumentar engajamento.
+- **Economia Criativa**: incentivo à atuação de cidadãos como empreendedores e curadores culturais.
+
+---
+
+## Tipos de Usuário
+
+### Visitante
+- Explora singularidades no mapa
+- Avalia e comenta experiências
+- Realiza missões e evolui no sistema
+
+### Empreendedor
+- Cadastra singularidades (via requisição)
+- Cria missões patrocinadas
+- Define recompensas (tickets e títulos)
+
+### Curador
+- Avalia requisições de singularidades
+- Publica e edita singularidades
+- Avalia maturidade das singularidades (modelo ISSM)
+
+---
+
+## Funcionalidades Principais
+
+- Mapa interativo com singularidades georreferenciadas
+- Avatar personalizável do usuário
+- Missões gerais e patrocinadas
+- Sistema de recompensas:
+  - Itens cosméticos
+  - Tickets (uso único)
+  - Títulos (benefícios permanentes)
+- Avaliação e comentários de singularidades
+- Painel do empreendedor
+- Painel do curador
+- Versão Web e Mobile
+
+---
+
+## Arquitetura e Tecnologias
+
+### Frontend
+- Flutter
+- Dart
+- Interface responsiva (mobile e web)
+
+### Backend
+- Node.js
+- API REST
+
+### Banco de Dados
+- MongoDB Atlas (NoSQL)
+
+### Armazenamento de Imagens
+- Amazon S3
+
+### Design e Assets
+- MediBang Paint (ilustrações e identidade visual)
+
+## Repositórios Relacionados
+- Backend (API): https://github.com/igorSerodio/cidade-singular-api
