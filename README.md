@@ -5,6 +5,7 @@
 Este repositório corresponde ao frontend da **versão 3.0** da aplicação, desenvolvida como Trabalho de Conclusão de Curso (TCC) no curso de **Ciência da Computação – UFCG**.
 
 Acessível em: https://cidade-singular.vercel.app/
+
 ---
 
 ## Objetivo do Projeto
